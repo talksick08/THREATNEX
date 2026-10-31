@@ -19,7 +19,7 @@ from train import FEATURES, LABELS, METRICS_PATH, MODEL_PATH, train
 # Keep paths independent of the terminal's working directory.
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
-DB_PATH = BASE_DIR / "ids.db"
+DB_PATH = Path("/tmp/ids.db") if os.getenv("VERCEL") else (BASE_DIR / "ids.db")
 METRICS_FILE = BASE_DIR / "metrics.json"
 CANDIDATE_MODEL_PATH = BASE_DIR / "model_candidate.joblib"
 
@@ -81,7 +81,11 @@ SIMULATION_WEIGHTS = {
 
 
 def get_connection():
-    """Create a SQLite connection with dictionary-like rows and busy timeout."""
+    """Create a database connection supporting PostgreSQL in production and SQLite in development."""
+    db_url = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+    if db_url and ("postgres" in db_url or "postgresql" in db_url):
+        import db_adapter
+        return db_adapter.get_connection()
     connection = sqlite3.connect(DB_PATH, timeout=15.0)
     connection.row_factory = sqlite3.Row
     return connection
