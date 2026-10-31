@@ -22,7 +22,9 @@ htmlcov/
 # are preserved and bundled. Raw uncompressed text files (~22.5 MB) are excluded.
 data/
 datasets/
-*.txt
+data/*.txt
+datasets/*.txt
+!requirements.txt
 
 # Audit and Experiment Directories
 ml_performance_audit/

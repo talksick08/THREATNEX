@@ -19,7 +19,8 @@ from train import FEATURES, LABELS, METRICS_PATH, MODEL_PATH, train
 # Keep paths independent of the terminal's working directory.
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
-DB_PATH = Path("/tmp/ids.db") if os.getenv("VERCEL") else (BASE_DIR / "ids.db")
+import tempfile
+DB_PATH = (Path(tempfile.gettempdir()) / "ids.db") if os.getenv("VERCEL") else (BASE_DIR / "ids.db")
 METRICS_FILE = BASE_DIR / "metrics.json"
 CANDIDATE_MODEL_PATH = BASE_DIR / "model_candidate.joblib"
 
@@ -201,7 +202,7 @@ def ensure_user_columns():
         for col, coltype in columns:
             try:
                 conn.execute(f"ALTER TABLE users ADD COLUMN {col} {coltype}")
-            except sqlite3.OperationalError:
+            except (sqlite3.OperationalError, Exception):
                 pass
 
 
@@ -216,7 +217,7 @@ def ensure_event_columns():
         for col, coltype in columns:
             try:
                 conn.execute(f"ALTER TABLE events ADD COLUMN {col} {coltype}")
-            except sqlite3.OperationalError:
+            except (sqlite3.OperationalError, Exception):
                 pass
 
 
@@ -233,18 +234,20 @@ def ensure_database_indexes():
         ]:
             try:
                 conn.execute(stmt)
-            except sqlite3.OperationalError:
+            except (sqlite3.OperationalError, Exception):
                 pass
 
 
 model = load_model()
 candidate_model = load_candidate_model()
-init_db()
-
-# Ensure user and event profile columns exist (idempotent migration)
-ensure_user_columns()
-ensure_event_columns()
-ensure_database_indexes()
+try:
+    init_db()
+    # Ensure user and event profile columns exist (idempotent migration)
+    ensure_user_columns()
+    ensure_event_columns()
+    ensure_database_indexes()
+except Exception as e:
+    app.logger.warning(f"Database initialization deferred/warning: {e}")
 
 @app.before_request
 def ensure_csrf_token():

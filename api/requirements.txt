@@ -1,0 +1,17 @@
+# ==============================================================================
+# THREATNEX AI-IDS — PRODUCTION DEPENDENCIES (Vercel & Local)
+# ==============================================================================
+
+# Core Web Framework
+Flask>=3.0.0
+Werkzeug>=3.0.0
+
+# Machine Learning & Scientific Computing
+# Note: Model serialization uses NumPy 2.x (numpy._core) and Pickle Protocol 5.
+numpy>=2.0.0
+scikit-learn>=1.4.0
+scipy>=1.10.0
+joblib>=1.3.0
+
+# Database Connectivity (Pure-Python PostgreSQL adapter for Serverless Vercel / Neon)
+pg8000>=1.30.0
