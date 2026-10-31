@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d18">
+  <title>THREATNEX | INTELLIGENT NETWORK DEFENSE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem("threatnex_theme") || "dark";
+        var a = localStorage.getItem("threatnex_accent") || "cyan";
+        if (t === "system") {
+          t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = t;
+        document.documentElement.dataset.accent = a;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar" id="sidebar">
+      <a href="#" class="brand" data-page="overview">
+        <span class="brand-mark"><span class="brand-symbol">T</span></span>
+        <span class="brand-copy">
+          <strong>THREATNEX</strong>
+          <small>INTELLIGENT NETWORK DEFENSE</small>
+        </span>
+      </a>
+
+      <div class="workspace-label">WORKSPACE</div>
+
+      <nav class="navigation">
+        <button class="nav-link active" data-page="overview">
+          <span class="nav-icon">◫</span><span>Dashboard</span>
+        </button>
+        <button class="nav-link" data-page="threats">
+          <span class="nav-icon">⌁</span><span>Threat Events</span>
+          <span class="nav-count" id="sidebar-threat-count">0</span>
+        </button>
+        <button class="nav-link" data-page="query">
+          <span class="nav-icon">⌕</span><span>Query Center</span>
+        </button>
+        <button class="nav-link" data-page="investigations">
+          <span class="nav-icon">🛡</span><span>Investigations</span>
+          <span class="nav-count nav-count-amber" id="sidebar-investigation-count">0</span>
+        </button>
+        <button class="nav-link" data-page="analyzer">
+          <span class="nav-icon">⌘</span><span>Traffic Analyzer</span>
+        </button>
+        <button class="nav-link" data-page="analytics">
+          <span class="nav-icon">◴</span><span>AI Analytics</span>
+        </button>
+        <button class="nav-link" data-page="reports">
+          <span class="nav-icon">📊</span><span>SOC Reports</span>
+        </button>
+        <button class="nav-link" data-page="health">
+          <span class="nav-icon">♥</span><span>System Health</span>
+        </button>
+        <button class="nav-link nav-link-settings" data-page="settings" id="main-nav-settings-btn" title="Open Settings &amp; Preferences (12 Sections)">
+          <span class="nav-icon">⚙</span><span>Settings &amp; Preferences</span>
+          <span class="nav-badge-pill">12</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="system-card">
+          <div class="system-card-heading">
+            <span class="status-dot"></span>
+            <span>System status</span>
+          </div>
+          <strong id="system-status">Connecting...</strong>
+          <p id="system-mode-desc">ML Detection Engine (NSL-KDD)</p>
+          <div class="system-progress"><span></span></div>
+          <div class="system-card-footer">
+            <span>Flask: <strong id="api-status">Checking</strong></span>
+            <span>DB: <strong id="db-status">Checking</strong></span>
+          </div>
+        </div>
+
+        <button class="nav-link" data-page="about">
+          <span class="nav-icon">ⓘ</span><span>About THREATNEX</span>
+        </button>
+        <button class="nav-link logout-btn" id="logout-button">
+          <span class="nav-icon">⏻</span><span>Logout</span>
+        </button>
+
+        <div class="profile" data-page="settings" style="cursor: pointer;" title="Open Profile &amp; Account Settings">
+          <div class="avatar" id="user-avatar">TN</div>
+          <div class="profile-info">
+            <strong id="user-display-name">Security Console</strong>
+            <small id="user-role-label">Local environment</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-menu" id="menu-toggle" aria-label="Toggle navigation">☰</button>
+          <div class="breadcrumb">Security <span>/</span> <strong id="breadcrumb-current">Overview</strong></div>
+        </div>
+        <div class="topbar-right">
+          <div class="live-indicator"><span class="pulse-dot"></span> LIVE MONITORING</div>
+          <button class="icon-button" id="refresh-button" title="Refresh dashboard" aria-label="Refresh">↻</button>
+          <button class="icon-button topbar-settings-icon" data-page="settings" id="topbar-settings-btn" title="Open Settings &amp; Preferences" aria-label="Settings">⚙</button>
+          <div class="topbar-avatar" data-page="settings" style="cursor: pointer;" title="Account Profile &amp; Settings">TN</div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- OVERVIEW -->
+        <section class="page active" id="page-overview">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> SECURITY OPERATIONS CENTER</div>
+              <h1>Security Overview<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Real-time telemetry, threat detection distribution, and priority analyst investigations.
+              </p>
+            </div>
+            <div class="heading-actions">
+              <span class="last-updated">Updated <strong id="last-updated">--:--:--</strong></span>
+              <button class="button button-secondary" id="open-simulator-btn"><span>⚡</span> Simulation Center</button>
+              <button class="button button-primary" id="simulate-button"><span>⚡</span> Quick Simulate</button>
+            </div>
+          </div>
+
+          <div class="notice-banner">
+            <div class="notice-icon">✦</div>
+            <div class="notice-copy">
+              <strong>Enterprise AI-Assisted SOC Telemetry</strong>
+              <p>Network connection vector analysis powered by scikit-learn RandomForest trained on NSL-KDD security benchmarks.</p>
+            </div>
+            <span class="notice-tag">ACTIVE ENGINE</span>
+          </div>
+
+          <div class="section-heading">
+            <div>
+              <h2>SOC Telemetry Overview</h2>
+              <p>Real-time security metrics from the event database (click any card to hunt in Query Center)</p>
+            </div>
+            <span class="section-meta"><span class="status-dot"></span> Backend connected status shown live</span>
+          </div>
+
+          <div class="stats-grid stats-grid-5" id="dash-widget-kpis">
+            <article class="stat-card clickable-stat" id="stat-card-total" data-nav-query="all" title="View all events in Query Center">
+              <div class="stat-top">
+                <span class="stat-label">Total Events</span>
+                <span class="stat-icon icon-blue">↗</span>
+              </div>
+              <div class="stat-value" id="stat-total">—</div>
+              <div class="stat-bottom"><span class="stat-caption">All recorded events</span></div>
+              <div class="stat-decoration decoration-blue"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" id="stat-card-threats" data-nav-query="threats" title="Filter threats in Query Center">
+              <div class="stat-top">
+                <span class="stat-label">Threats Detected</span>
+                <span class="stat-icon icon-red">⌁</span>
+              </div>
+              <div class="stat-value" id="stat-threats">—</div>
+              <div class="stat-bottom"><span class="severity-dot red"></span><span class="stat-caption">Malicious classifications</span></div>
+              <div class="stat-decoration decoration-red"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" id="stat-card-critical" data-nav-query="critical_high" title="Filter Critical/High alerts in Query Center">
+              <div class="stat-top">
+                <span class="stat-label">Critical & High</span>
+                <span class="stat-icon icon-red">⚠</span>
+              </div>
+              <div class="stat-value" id="stat-critical">—</div>
+              <div class="stat-bottom"><span class="severity-dot red"></span><span class="stat-caption">Urgent triage needed</span></div>
+              <div class="stat-decoration decoration-red"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" id="stat-card-normal" data-nav-query="normal" title="Filter Normal traffic in Query Center">
+              <div class="stat-top">
+                <span class="stat-label">Normal Traffic</span>
+                <span class="stat-icon icon-green">✓</span>
+              </div>
+              <div class="stat-value" id="stat-normal">—</div>
+              <div class="stat-bottom"><span class="severity-dot green"></span><span class="stat-caption">Benign network flows</span></div>
+              <div class="stat-decoration decoration-green"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" id="stat-card-accuracy" data-page="analytics" title="Inspect model evaluation metrics">
+              <div class="stat-top">
+                <span class="stat-label">Model Accuracy</span>
+                <span class="stat-icon icon-purple">◎</span>
+              </div>
+              <div class="stat-value" id="stat-accuracy">—<span class="value-unit">%</span></div>
+              <div class="stat-bottom"><span class="stat-caption" id="model-source">NSL-KDD Test+ benchmark</span></div>
+              <div class="stat-decoration decoration-purple"></div>
+            </article>
+          </div>
+
+          <!-- EVENT ACTIVITY TIMELINE -->
+          <article class="panel timeline-panel" id="dash-widget-timeline" style="margin-top: 18px;">
+            <div class="panel-header">
+              <div>
+                <h3>Event Activity Timeline</h3>
+                <p>Distribution of threat alerts vs total traffic over time</p>
+              </div>
+              <div class="timeline-controls">
+                <span class="filter-label">Range:</span>
+                <div class="pill-group" id="timeline-range-pills">
+                  <button class="pill-btn active" data-range="1h">1 Hour</button>
+                  <button class="pill-btn" data-range="24h">24 Hours</button>
+                  <button class="pill-btn" data-range="7d">7 Days</button>
+                </div>
+              </div>
+            </div>
+            <div class="timeline-canvas-container" style="position: relative; height: 180px; width: 100%;">
+              <canvas id="timeline-chart" aria-label="Event activity timeline chart"></canvas>
+            </div>
+          </article>
+
+          <!-- 3-COLUMN SOC METRICS GRID -->
+          <div class="dashboard-grid dashboard-grid-3" id="dash-widget-middle-grid" style="margin-top: 18px;">
+            <article class="panel distribution-panel" id="dash-widget-donut">
+              <div class="panel-header">
+                <div>
+                  <h3>Threat Classification</h3>
+                  <p>Distribution by predicted attack type</p>
+                </div>
+                <span class="panel-chip">ATTACK TYPES</span>
+              </div>
+              <div class="donut-layout">
+                <div class="donut-wrap">
+                  <canvas id="traffic-chart" aria-label="Traffic classification chart"></canvas>
+                  <div class="donut-center">
+                    <strong id="donut-total">0</strong>
+                    <span>EVENTS</span>
+                  </div>
+                </div>
+                <div class="legend-list" id="traffic-legend">
+                  <div class="empty-state small-empty">Waiting for event data...</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel severity-panel" id="dash-widget-severity">
+              <div class="panel-header">
+                <div>
+                  <h3>Severity Distribution</h3>
+                  <p>Events grouped by risk level</p>
+                </div>
+                <span class="panel-chip">RISK</span>
+              </div>
+              <div class="severity-breakdown-list" id="severity-breakdown-list">
+                <div class="empty-state small-empty">Loading severities...</div>
+              </div>
+            </article>
+
+            <article class="panel top-sources-panel" id="dash-widget-top-sources">
+              <div class="panel-header">
+                <div>
+                  <h3>Top Threat Actors</h3>
+                  <p>Most active source IPs by threat count</p>
+                </div>
+                <span class="panel-chip">SOURCE IPS</span>
+              </div>
+              <div class="top-sources-list" id="top-sources-list">
+                <div class="empty-state small-empty">No threat IP activity recorded.</div>
+              </div>
+            </article>
+          </div>
+
+          <!-- PRIORITY INVESTIGATIONS TABLE -->
+          <article class="panel table-panel" id="dash-widget-priority-alerts" style="margin-top: 18px;">
+            <div class="panel-header table-panel-header">
+              <div>
+                <h3>Highest-Priority Events Requiring Investigation</h3>
+                <p>Critical and high severity alerts that have not yet been resolved</p>
+              </div>
+              <button class="button button-secondary button-small" data-page="investigations">Open Investigations Console →</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>EVENT</th>
+                    <th>SOURCE IP</th>
+                    <th>CLASSIFICATION</th>
+                    <th>SEVERITY</th>
+                    <th>CONFIDENCE</th>
+                    <th>STATUS</th>
+                    <th>TIMESTAMP</th>
+                    <th>TRIAGE</th>
+                  </tr>
+                </thead>
+                <tbody id="priority-alerts-tbody">
+                  <tr>
+                    <td colspan="8" class="table-empty">No uninvestigated critical or high alerts. System clear.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- RECENT SECURITY EVENTS TABLE -->
+          <article class="panel table-panel" id="dash-widget-recent-activity" style="margin-top: 18px;">
+            <div class="panel-header table-panel-header">
+              <div>
+                <h3>Latest Security Events</h3>
+                <p>Recent network classifications and their triage status</p>
+              </div>
+              <button class="button button-secondary button-small" data-page="threats">Open Event Explorer →</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>EVENT</th>
+                    <th>SOURCE IP</th>
+                    <th>CLASSIFICATION</th>
+                    <th>SEVERITY</th>
+                    <th>CONFIDENCE</th>
+                    <th>STATUS</th>
+                    <th>TIMESTAMP</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-events-body">
+                  <tr>
+                    <td colspan="8" class="table-empty">Waiting for events...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- DASHBOARD MODEL PERFORMANCE PANEL (TOGGLEABLE VIA SETTINGS) -->
+          <article class="panel" id="dash-widget-model-panel" style="margin-top: 18px;">
+            <div class="panel-header">
+              <div>
+                <h3>Model Architecture & Performance Telemetry</h3>
+                <p>NSL-KDD benchmark evaluation metrics and trained classifier specifications</p>
+              </div>
+              <span class="panel-chip chip-purple">RANDOM FOREST</span>
+            </div>
+            <div class="dashboard-grid dashboard-grid-3" style="margin-top: 8px;">
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">Model Evaluation Accuracy</span>
+                <div class="stat-value" id="dash-perf-accuracy" style="font-size: 1.5rem; margin-top: 6px;">99.2%</div>
+                <small class="stat-caption">Evaluated against test dataset</small>
+              </div>
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">Weighted F1-Score</span>
+                <div class="stat-value" id="dash-perf-f1" style="font-size: 1.5rem; margin-top: 6px;">99.1%</div>
+                <small class="stat-caption">Harmonic mean of precision & recall</small>
+              </div>
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">Feature Vector Dimensionality</span>
+                <div class="stat-value" style="font-size: 1.5rem; margin-top: 6px;">12 Features</div>
+                <small class="stat-caption">NSL-KDD standardized connection attributes</small>
+              </div>
+            </div>
+          </article>
+
+          <!-- DASHBOARD SYSTEM HEALTH PANEL (TOGGLEABLE VIA SETTINGS) -->
+          <article class="panel" id="dash-widget-system-health" style="margin-top: 18px;">
+            <div class="panel-header">
+              <div>
+                <h3>System Telemetry & Database Health</h3>
+                <p>Real-time persistence layer and operational inference health</p>
+              </div>
+              <span class="panel-chip chip-green">OPERATIONAL</span>
+            </div>
+            <div class="dashboard-grid dashboard-grid-3" style="margin-top: 8px;">
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">SQLite Engine Status</span>
+                <div class="stat-value" id="dash-health-db" style="font-size: 1.25rem; margin-top: 6px; color: var(--color-green);">Connected (WAL)</div>
+                <small class="stat-caption">ACID compliant local event store</small>
+              </div>
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">Inference Latency</span>
+                <div class="stat-value" id="dash-health-latency" style="font-size: 1.25rem; margin-top: 6px; color: var(--color-cyan);">&lt; 1.5 ms / evt</div>
+                <small class="stat-caption">Vector transform & tree traversal</small>
+              </div>
+              <div class="stat-card" style="padding: 16px;">
+                <span class="stat-label">Classifier Availability</span>
+                <div class="stat-value" id="dash-health-model" style="font-size: 1.25rem; margin-top: 6px; color: var(--color-purple);">Active (Joblib)</div>
+                <small class="stat-caption">Pre-loaded memory model pipeline</small>
+              </div>
+            </div>
+          </article>
+          <div class="page-footer"><span>THREATNEX Enterprise SOC</span><span>Machine learning assisted network threat monitoring & triage</span>
+          </div>
+        </section>
+
+        <!-- THREAT MONITORING -->
+        <section class="page" id="page-threats">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> EVENT INVESTIGATION</div>
+              <h1>Threat monitoring<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Explore recorded classifications and investigate suspicious network events.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-secondary" id="threat-refresh">↻ Refresh events</button>
+            </div>
+          </div>
+
+          <div class="stats-grid compact-stats">
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Total events</span><span
+                  class="stat-icon icon-blue">▤</span></div>
+              <div class="stat-value" id="threat-total">0</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">DoS attacks</span><span class="stat-icon icon-red">⌁</span>
+              </div>
+              <div class="stat-value" id="threat-dos">0</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Probe activity</span><span
+                  class="stat-icon icon-orange">⌕</span></div>
+              <div class="stat-value" id="threat-probe">0</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Brute force</span><span
+                  class="stat-icon icon-purple">⌑</span></div>
+              <div class="stat-value" id="threat-brute">0</div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="filter-toolbar">
+              <div class="search-field">
+                <span>⌕</span>
+                <input id="event-search" type="search" placeholder="Search IP, attack type, severity...">
+              </div>
+              <select id="event-type-filter" aria-label="Filter by classification">
+                <option value="all">All classifications</option>
+                <option value="normal">Normal</option>
+                <option value="dos">DoS</option>
+                <option value="probe">Probe</option>
+                <option value="brute_force">Brute force</option>
+              </select>
+              <select id="event-severity-filter" aria-label="Filter by severity">
+                <option value="all">All severities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+                <option value="info">Info</option>
+              </select>
+              <button class="button button-secondary" id="clear-filters">Clear filters</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>EVENT</th>
+                    <th>SOURCE IP</th>
+                    <th>CLASSIFICATION</th>
+                    <th>SEVERITY</th>
+                    <th>CONFIDENCE</th>
+                    <th>TIMESTAMP</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="all-events-body">
+                  <tr>
+                    <td colspan="7" class="table-empty">Loading events...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span id="event-count-label">0 events</span>
+              <span>Showing available recent records</span>
+            </div>
+          </article>
+
+          <div class="danger-zone panel">
+            <div>
+              <h3>Reset event history</h3>
+              <p>Clear recorded dashboard events using your backend reset endpoint.</p>
+            </div>
+            <button class="button button-danger" id="reset-events">Reset events</button>
+          </div>
+        </section>
+
+        <!-- TRAFFIC ANALYZER -->
+        <section class="page" id="page-analyzer">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> MANUAL INSPECTION</div>
+              <h1>Traffic analyzer<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Submit network traffic features to your trained model for classification.</p>
+            </div>
+          </div>
+
+          <div class="analyzer-layout">
+            <article class="panel analyzer-form-panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Network feature input</h3>
+                  <p>Enter the 12 features accepted by your model.</p>
+                </div>
+                <span class="panel-chip">12 FEATURES</span>
+              </div>
+
+              <form id="analyzer-form">
+                <div class="form-section-title">Connection metrics</div>
+                <div class="form-grid">
+                  <label class="field"><span>Duration</span><input name="duration" type="number" min="0" step="any"
+                      value="0" required><small>Connection duration</small></label>
+                  <label class="field"><span>Source bytes</span><input name="src_bytes" type="number" min="0" step="any"
+                      value="100" required><small>Bytes sent by source</small></label>
+                  <label class="field"><span>Destination bytes</span><input name="dst_bytes" type="number" min="0"
+                      step="any" value="200" required><small>Bytes sent by destination</small></label>
+                  <label class="field"><span>Connection count</span><input name="count" type="number" min="0" step="any"
+                      value="1" required><small>Recent connection count</small></label>
+                  <label class="field"><span>Service count</span><input name="srv_count" type="number" min="0"
+                      step="any" value="1" required><small>Connections to same service</small></label>
+                  <label class="field"><span>Destination host count</span><input name="dst_host_count" type="number"
+                      min="0" step="any" value="1" required><small>Destination host activity</small></label>
+                </div>
+
+                <div class="form-section-title">Traffic behaviour rates</div>
+                <div class="form-grid">
+                  <label class="field"><span>SYN error rate</span><input name="serror_rate" type="number" min="0"
+                      max="1" step="any" value="0" required><small>Expected range: 0–1</small></label>
+                  <label class="field"><span>REJ error rate</span><input name="rerror_rate" type="number" min="0"
+                      max="1" step="any" value="0" required><small>Expected range: 0–1</small></label>
+                  <label class="field"><span>Same service rate</span><input name="same_srv_rate" type="number" min="0"
+                      max="1" step="any" value="1" required><small>Expected range: 0–1</small></label>
+                  <label class="field"><span>Different service rate</span><input name="diff_srv_rate" type="number"
+                      min="0" max="1" step="any" value="0" required><small>Expected range: 0–1</small></label>
+                </div>
+
+                <div class="form-section-title">Security indicators</div>
+                <div class="form-grid">
+                  <label class="field"><span>Failed logins</span><input name="failed_logins" type="number" min="0"
+                      step="any" value="0" required><small>Failed login attempts</small></label>
+                  <label class="field"><span>Compromised conditions</span><input name="num_compromised" type="number"
+                      min="0" step="any" value="0" required><small>Compromise indicator count</small></label>
+                </div>
+
+                <div class="form-actions">
+                  <button class="button button-primary" id="analyze-button" type="submit">✦ Analyze traffic</button>
+                  <button class="button button-secondary" type="reset">Reset form</button>
+                </div>
+                <p class="form-footnote">Results depend on the feature mapping and training data used by the model.
+                  Example values are for demonstration only.</p>
+              </form>
+            </article>
+
+            <aside class="panel result-panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Analysis result</h3>
+                  <p>Model prediction</p>
+                </div><span class="result-orb">✦</span>
+              </div>
+              <div id="analysis-placeholder" class="result-placeholder">
+                <div class="placeholder-illustration">⌘</div>
+                <strong>Ready to analyze</strong>
+                <p>Submit the feature values to see the model's classification.</p>
+              </div>
+              <div id="analysis-result" class="analysis-result hidden">
+                <span class="result-label">PREDICTED CLASS</span>
+                <h2 id="result-class">—</h2>
+                <span id="result-severity" class="severity-badge info">INFO</span>
+                <div class="confidence-block">
+                  <div><span>Confidence</span><strong id="result-confidence">—</strong></div>
+                  <div class="confidence-track"><span id="confidence-bar"></span></div>
+                </div>
+                <div class="result-detail"><span>Source IP</span><strong id="result-ip">Not provided</strong></div>
+                <div class="result-detail"><span>Event ID</span><strong id="result-id">—</strong></div>
+                <div class="result-message" id="result-message"></div>
+              </div>
+              <div class="result-disclaimer"><span>ⓘ</span>
+                <p>This tool classifies the supplied features. It does not capture live network packets by itself.</p>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section class="page" id="page-analytics">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> MODEL INTELLIGENCE</div>
+              <h1>AI analytics<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Review evaluation metrics and the features influencing model predictions.</p>
+            </div>
+            <span class="panel-chip" id="analytics-source">MODEL METRICS</span>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Accuracy</span><span class="stat-icon icon-blue">◎</span>
+              </div>
+              <div class="stat-value" id="metric-accuracy">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Evaluation accuracy</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Training samples</span><span
+                  class="stat-icon icon-purple">▤</span></div>
+              <div class="stat-value" id="metric-train">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Used for model training</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Test samples</span><span
+                  class="stat-icon icon-green">✓</span></div>
+              <div class="stat-value" id="metric-test">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Used for evaluation</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span class="stat-label">Recorded events</span><span
+                  class="stat-icon icon-orange">↗</span></div>
+              <div class="stat-value" id="metric-events">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Dashboard event history</span></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid analytics-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Feature importance</h3>
+                  <p>Features ranked by reported model importance</p>
+                </div>
+              </div>
+              <div class="importance-chart-wrap"><canvas id="importance-chart"></canvas></div>
+              <div id="importance-empty" class="empty-state hidden">No feature importance data was supplied by the
+                backend.</div>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Per-class performance</h3>
+                  <p>Precision, recall and F1 score</p>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table class="metrics-table">
+                  <thead>
+                    <tr>
+                      <th>CLASS</th>
+                      <th>PRECISION</th>
+                      <th>RECALL</th>
+                      <th>F1 SCORE</th>
+                    </tr>
+                  </thead>
+                  <tbody id="class-metrics-body">
+                    <tr>
+                      <td colspan="4" class="table-empty">Loading metrics...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="notice-banner analytics-note">
+            <div class="notice-icon">ⓘ</div>
+            <div class="notice-copy">
+              <strong>How to interpret these metrics</strong>
+              <p>Accuracy alone can hide weak performance on specific attack classes. Review precision, recall and F1
+                score together. These metrics describe the saved evaluation results, not a guarantee of real-world
+                detection performance.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABOUT -->
+        <section class="page" id="page-about">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> PLATFORM INFORMATION</div>
+              <h1>About THREATNEX<span class="title-period">.</span></h1>
+              <p class="page-subtitle">An AI-assisted intrusion detection project for network security monitoring.</p>
+            </div>
+          </div>
+
+          <article class="panel about-hero">
+            <div class="about-logo">T</div>
+            <div>
+              <span class="panel-chip">AI-DRIVEN IDS</span>
+              <h2>See threats. Understand patterns. Investigate smarter.</h2>
+              <p>THREATNEX is a machine-learning-based intrusion detection dashboard. It displays network classifications, summarizes security events, and exposes model evaluation metrics through a Flask web application.</p>
+            </div>
+          </article>
+
+          <div class="about-grid">
+            <article class="panel about-card"><span class="about-card-icon">⌁</span>
+              <h3>Intrusion detection</h3>
+              <p>Classifies supplied network connection features into the model's supported categories.</p>
+            </article>
+            <article class="panel about-card"><span class="about-card-icon">◴</span>
+              <h3>Event monitoring</h3>
+              <p>Displays recorded predictions and event counts returned by the backend.</p>
+            </article>
+            <article class="panel about-card"><span class="about-card-icon">✦</span>
+              <h3>Model analytics</h3>
+              <p>Shows evaluation metrics and feature importance when the backend provides them.</p>
+            </article>
+          </div>
+
+          <article class="panel about-technical">
+            <div class="panel-header">
+              <div>
+                <h3>Technology stack</h3>
+                <p>Components used in the current application</p>
+              </div>
+            </div>
+            <div class="tech-list">
+              <div><span>Backend</span><strong>Python · Flask</strong></div>
+              <div><span>Machine learning</span><strong>Scikit-learn · Joblib</strong></div>
+              <div><span>Data storage</span><strong>SQLite</strong></div>
+              <div><span>Frontend</span><strong>HTML · CSS · JavaScript</strong></div>
+              <div><span>Evaluation dataset</span><strong>NSL-KDD</strong></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- SETTINGS -->
+        <!-- SETTINGS WORKSPACE -->
+        <section class="page" id="page-settings">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> CONFIGURATION CENTER</div>
+              <h1>Settings &amp; Preferences<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Comprehensive SOC configuration: theme &amp; display, alert thresholds, detection sensitivity, query defaults, data retention, and account security.</p>
+            </div>
+            <div class="page-heading-actions">
+              <span class="unsaved-pill-badge" id="unsaved-status-pill" style="display:none;">● Unsaved changes</span>
+              <button class="button button-primary" id="save-settings-top-btn">✦ Save Changes</button>
+              <button class="button button-secondary" id="cancel-settings-top-btn">✕ Revert</button>
+            </div>
+          </div>
+
+          <!-- TOP FLOATING / STICKY UNSAVED BANNER -->
+          <div class="theme-preview-alert" id="settings-unsaved-banner" style="display:none;">
+            <div class="preview-alert-content">
+              <span class="preview-alert-icon">⚡</span>
+              <div>
+                <strong>Unsaved Preferences Active</strong>
+                <p>You have made changes to settings. Click <em>Save Changes</em> to persist across sessions or <em>Revert</em> to restore saved values.</p>
+              </div>
+            </div>
+            <div class="preview-alert-actions">
+              <button class="button button-primary button-small" id="save-settings">Save Changes</button>
+              <button class="button button-secondary button-small" id="cancel-settings">Revert</button>
+              <button class="button button-secondary button-small" id="reset-current-section-btn">↺ Reset Section</button>
+            </div>
+          </div>
+
+          <!-- SETTINGS MAIN TWO-COLUMN WORKSPACE -->
+          <div class="settings-workspace-layout">
+            <!-- LEFT NAVIGATION SIDEBAR -->
+            <aside class="settings-nav-sidebar">
+              <div class="settings-search-box">
+                <span class="settings-search-icon">⌕</span>
+                <input type="text" id="settings-search-input" placeholder="Search preferences..." autocomplete="off">
+                <button type="button" id="settings-search-clear" class="settings-search-clear" style="display:none;">✕</button>
+              </div>
+
+              <div class="settings-nav-header">
+                <span class="settings-nav-title">CONFIGURATION SECTIONS</span>
+                <span class="settings-nav-badge">12</span>
+              </div>
+
+              <nav class="settings-nav-menu" id="settings-nav-menu">
+                <button type="button" class="settings-nav-item active" data-target="setsec-general">
+                  <span class="sec-num-badge">01</span>
+                  <span class="nav-icon">⚙</span>
+                  <span class="nav-label">General Configuration</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-appearance">
+                  <span class="sec-num-badge">02</span>
+                  <span class="nav-icon">🎨</span>
+                  <span class="nav-label">Appearance &amp; Themes</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-dashboard">
+                  <span class="sec-num-badge">03</span>
+                  <span class="nav-icon">📊</span>
+                  <span class="nav-label">Dashboard Preferences</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-notifications">
+                  <span class="sec-num-badge">04</span>
+                  <span class="nav-icon">🔔</span>
+                  <span class="nav-label">Notifications &amp; Alerts</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-detection">
+                  <span class="sec-num-badge">05</span>
+                  <span class="nav-icon">🎯</span>
+                  <span class="nav-label">Detection &amp; Model</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-query">
+                  <span class="sec-num-badge">06</span>
+                  <span class="nav-icon">🔍</span>
+                  <span class="nav-label">Query Center Defaults</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-events">
+                  <span class="sec-num-badge">07</span>
+                  <span class="nav-icon">🛡</span>
+                  <span class="nav-label">Event Management</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-data">
+                  <span class="sec-num-badge">08</span>
+                  <span class="nav-icon">💾</span>
+                  <span class="nav-label">Data &amp; Retention</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-export">
+                  <span class="sec-num-badge">09</span>
+                  <span class="nav-icon">📑</span>
+                  <span class="nav-label">Export &amp; Reports</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-security">
+                  <span class="sec-num-badge">10</span>
+                  <span class="nav-icon">🔒</span>
+                  <span class="nav-label">Security &amp; Privacy</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-account">
+                  <span class="sec-num-badge">11</span>
+                  <span class="nav-icon">👤</span>
+                  <span class="nav-label">Account &amp; Profile</span>
+                </button>
+                <button type="button" class="settings-nav-item" data-target="setsec-system">
+                  <span class="sec-num-badge">12</span>
+                  <span class="nav-icon">ℹ</span>
+                  <span class="nav-label">System Information</span>
+                </button>
+              </nav>
+
+              <div class="settings-nav-footer">
+                <button type="button" class="button button-sm button-secondary text-red w-100" id="reset-all-settings-btn">↺ Reset All Preferences</button>
+              </div>
+            </aside>
+
+            <!-- RIGHT SECTIONS WRAPPER -->
+            <div class="settings-sections-wrapper" id="settings-sections-wrapper">
+
+              <!-- SECTION 1: GENERAL -->
+              <article class="panel settings-section-card active" id="setsec-general" data-section="general">
+                <div class="panel-header">
+                  <div>
+                    <h3>1. General Preferences</h3>
+                    <p>Core platform display options, timezone, formats, and auto-refresh intervals</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="general">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Display Name</span>
+                      <input type="text" id="setting-display-name" placeholder="Analyst Name / Alias" maxlength="50">
+                      <small>Shown in the user profile, report signatures, and audit logs</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Landing Page</span>
+                      <select id="setting-default-landing-page">
+                        <option value="overview">Dashboard Overview</option>
+                        <option value="events">Threat Events Feed</option>
+                        <option value="query">Query Center (Threat Hunting)</option>
+                        <option value="investigations">Investigation Cases</option>
+                        <option value="analyzer">Traffic Analyzer</option>
+                        <option value="model">AI Analytics &amp; Feature Weights</option>
+                        <option value="reports">SOC Summary Reports</option>
+                        <option value="health">System Health &amp; Simulator</option>
+                      </select>
+                      <small>Initial view loaded upon authentication</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Analytics Time Range</span>
+                      <select id="setting-default-time-range">
+                        <option value="all">All Historical Time</option>
+                        <option value="1h">Past 1 Hour (Real-Time)</option>
+                        <option value="6h">Past 6 Hours</option>
+                        <option value="24h">Past 24 Hours (Daily)</option>
+                        <option value="7d">Past 7 Days (Weekly)</option>
+                        <option value="30d">Past 30 Days (Monthly)</option>
+                      </select>
+                      <small>Default timeframe applied when loading telemetry</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Preferred Timezone</span>
+                      <select id="setting-timezone">
+                        <option value="local">Local Browser Time</option>
+                        <option value="UTC">UTC / Zulu (Universal)</option>
+                        <option value="America/New_York">US Eastern (America/New_York)</option>
+                        <option value="Europe/London">UK GMT/BST (Europe/London)</option>
+                        <option value="Asia/Kolkata">India IST (Asia/Kolkata)</option>
+                        <option value="Asia/Tokyo">Japan JST (Asia/Tokyo)</option>
+                      </select>
+                      <small>Display timestamps formatted in this zone</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Date &amp; Time Format</span>
+                      <select id="setting-datetime-format">
+                        <option value="YYYY-MM-DD HH:mm:ss">2026-10-30 14:30:00 (ISO)</option>
+                        <option value="DD/MM/YYYY HH:mm:ss">30/10/2026 14:30:00 (UK/IN)</option>
+                        <option value="MM/DD/YYYY HH:mm:ss">10/30/2026 14:30:00 (US)</option>
+                        <option value="ISO 8601">2026-10-30T14:30:00Z (RFC3339)</option>
+                      </select>
+                      <small>Timestamp rendering format in tables and logs</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Number Format</span>
+                      <select id="setting-number-format">
+                        <option value="en-US">1,234.56 (Standard en-US)</option>
+                        <option value="de-DE">1.234,56 (European de-DE)</option>
+                        <option value="en-IN">1,23,456.78 (South Asian en-IN)</option>
+                      </select>
+                      <small>Formatting for event counters and metrics</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Interface Density</span>
+                      <select id="setting-density">
+                        <option value="comfortable">Comfortable (Standard)</option>
+                        <option value="compact">Compact (High Content Density)</option>
+                      </select>
+                      <small>Controls padding and spacing across cards and panels</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Table Page Size</span>
+                      <input type="number" id="setting-page-size" min="5" max="200" value="20">
+                      <small>Default number of event records per page (5-200)</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Auto-Refresh Interval</span>
+                      <select id="setting-refresh-interval">
+                        <option value="5">Every 5 seconds</option>
+                        <option value="10">Every 10 seconds (default)</option>
+                        <option value="30">Every 30 seconds</option>
+                        <option value="60">Every 60 seconds</option>
+                        <option value="120">Every 2 minutes</option>
+                      </select>
+                      <small>Frequency of background telemetry polling</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-confirm-destructive" checked>
+                      <div class="toggle-content">
+                        <strong>Confirm Destructive Actions</strong>
+                        <span>Show confirmation dialogs before resetting telemetry, purging data, or clearing queries</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-auto-refresh" checked>
+                      <div class="toggle-content">
+                        <strong>Auto-Refresh Dashboard</strong>
+                        <span>Periodically poll the backend for latest telemetry and detection statistics</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 2: APPEARANCE & THEMES -->
+              <article class="panel settings-section-card" id="setsec-appearance" data-section="appearance">
+                <div class="panel-header">
+                  <div>
+                    <h3>2. Appearance &amp; Themes</h3>
+                    <p>Visual theme styles, accent palettes, typography scale, and animation controls</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="appearance">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <!-- Theme Card Selector -->
+                  <div class="theme-cards-grid theme-cards-3">
+                    <div class="theme-option-card active" id="theme-card-dark" data-theme-val="dark">
+                      <div class="theme-card-preview dark-preview">
+                        <div class="mock-header"></div>
+                        <div class="mock-body">
+                          <div class="mock-sidebar"></div>
+                          <div class="mock-content">
+                            <div class="mock-card"></div>
+                            <div class="mock-card"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="theme-card-info">
+                        <div class="theme-card-title">
+                          <strong>Dark SOC Theme</strong>
+                          <span class="theme-check-icon">✓</span>
+                        </div>
+                        <small>Deep slate contrast, optimal for low-light SOC control rooms</small>
+                      </div>
+                    </div>
+
+                    <div class="theme-option-card" id="theme-card-light" data-theme-val="light">
+                      <div class="theme-card-preview light-preview">
+                        <div class="mock-header"></div>
+                        <div class="mock-body">
+                          <div class="mock-sidebar"></div>
+                          <div class="mock-content">
+                            <div class="mock-card"></div>
+                            <div class="mock-card"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="theme-card-info">
+                        <div class="theme-card-title">
+                          <strong>Light Enterprise Theme</strong>
+                          <span class="theme-check-icon">✓</span>
+                        </div>
+                        <small>High daylight readability with crisp typography and clean elevation</small>
+                      </div>
+                    </div>
+
+                    <div class="theme-option-card" id="theme-card-system" data-theme-val="system">
+                      <div class="theme-card-preview system-preview">
+                        <div class="mock-header"></div>
+                        <div class="mock-body">
+                          <div class="mock-sidebar"></div>
+                          <div class="mock-content">
+                            <div class="mock-card"></div>
+                            <div class="mock-card"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="theme-card-info">
+                        <div class="theme-card-title">
+                          <strong>System Mode</strong>
+                          <span class="theme-check-icon">✓</span>
+                        </div>
+                        <small>Automatically matches your OS dark/light mode preference</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Theme Selection</span>
+                      <select id="setting-theme">
+                        <option value="dark">Dark SOC Theme (default)</option>
+                        <option value="light">Light Enterprise Theme</option>
+                        <option value="system">System Mode</option>
+                      </select>
+                      <small>Instant live preview applies immediately</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Accent Palette Preset</span>
+                      <select id="setting-accent-preset">
+                        <option value="cyan">Cyber Cyan (#00d2ff)</option>
+                        <option value="emerald">Terminal Emerald (#10b981)</option>
+                        <option value="indigo">SOC Indigo (#6366f1)</option>
+                        <option value="amber">Alert Amber (#f59e0b)</option>
+                        <option value="crimson">High-Threat Crimson (#ef4444)</option>
+                      </select>
+                      <small>Primary highlighting color for metrics, borders, and buttons</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Font Size Scale</span>
+                      <select id="setting-font-size">
+                        <option value="small">Small (13px - Compact)</option>
+                        <option value="normal" selected>Normal (14px - Default)</option>
+                        <option value="large">Large (16px - High Legibility)</option>
+                      </select>
+                      <small>Scales base font size across all workspace elements</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-2col">
+                    <label class="field">
+                      <span>Table Row Density</span>
+                      <select id="setting-table-row-density">
+                        <option value="compact">Compact (Dense security triage)</option>
+                        <option value="standard" selected>Standard (Balanced row height)</option>
+                        <option value="spacious">Spacious (Relaxed padding)</option>
+                      </select>
+                      <small>Row vertical height for telemetry tables</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Sidebar Default State</span>
+                      <select id="setting-sidebar-state">
+                        <option value="expanded">Expanded (Full icon + labels)</option>
+                        <option value="collapsed">Collapsed (Icon-only compact bar)</option>
+                      </select>
+                      <small>Initial state of the primary navigation rail</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-chart-animations" checked>
+                      <div class="toggle-content">
+                        <strong>Chart Visual Animations</strong>
+                        <span>Enable smooth transitions and easing on timeline and donut charts</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-reduced-motion">
+                      <div class="toggle-content">
+                        <strong>Reduced Motion (Accessibility)</strong>
+                        <span>Disable non-essential animations and instant transitions</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 3: DASHBOARD PREFERENCES -->
+              <article class="panel settings-section-card" id="setsec-dashboard" data-section="dashboard">
+                <div class="panel-header">
+                  <div>
+                    <h3>3. Dashboard Preferences</h3>
+                    <p>Toggle visibility of dashboard analytics panels and customize feed limits</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="dashboard">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <span class="settings-group-label">Toggle Dashboard Widget Visibility</span>
+                  <div class="widget-toggles-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-kpis" checked>
+                      <div class="toggle-content">
+                        <strong>KPI Overview Counters</strong>
+                        <span>Total events, threats, critical/high alerts, normal baseline</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-timeline" checked>
+                      <div class="toggle-content">
+                        <strong>Activity Timeline Chart</strong>
+                        <span>Interactive time-series telemetry volume and threat velocity</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-threat-donut" checked>
+                      <div class="toggle-content">
+                        <strong>Threat Category Donut</strong>
+                        <span>Proportional breakdown of DoS, Probe, and Brute Force</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-severity-breakdown" checked>
+                      <div class="toggle-content">
+                        <strong>Severity Breakdown Bars</strong>
+                        <span>Critical, high, medium, and low severity distribution</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-top-sources" checked>
+                      <div class="toggle-content">
+                        <strong>Top Source IP Panel</strong>
+                        <span>List of source IPs generating the highest threat volumes</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-priority-alerts" checked>
+                      <div class="toggle-content">
+                        <strong>Priority Triage Alerts</strong>
+                        <span>Urgent open incidents requiring immediate analyst investigation</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-recent-activity" checked>
+                      <div class="toggle-content">
+                        <strong>Recent Events Feed</strong>
+                        <span>Real-time rolling event stream table</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-model-metrics" checked>
+                      <div class="toggle-content">
+                        <strong>Model Performance Metrics</strong>
+                        <span>Evaluation accuracy, F1 score, and NSL-KDD test partition disclosure</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-system-health" checked>
+                      <div class="toggle-content">
+                        <strong>System Health Panel</strong>
+                        <span>Database status, model memory state, and test simulator triggers</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-2col" style="margin-top: 16px;">
+                    <label class="field">
+                      <span>Recent Events Feed Limit</span>
+                      <select id="setting-recent-events-limit">
+                        <option value="5">5 events</option>
+                        <option value="10" selected>10 events (default)</option>
+                        <option value="15">15 events</option>
+                        <option value="20">20 events</option>
+                      </select>
+                      <small>Maximum rows shown in the dashboard recent telemetry table</small>
+                    </label>
+
+                    <label class="toggle-card" style="margin-top: 24px;">
+                      <input type="checkbox" id="setting-show-normal-events" checked>
+                      <div class="toggle-content">
+                        <strong>Show Normal Baseline in Recent Feed</strong>
+                        <span>Display benign connection records alongside threat classifications</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 4: NOTIFICATIONS & ALERTS -->
+              <article class="panel settings-section-card" id="setsec-notifications" data-section="notifications">
+                <div class="panel-header">
+                  <div>
+                    <h3>4. Notifications &amp; Alerts</h3>
+                    <p>Alert threshold levels, audio chimes, desktop permissions, and toast auto-dismissal</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="notifications">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-2col">
+                    <label class="field">
+                      <span>Minimum Severity Threshold for Alerts</span>
+                      <select id="setting-notify-severity">
+                        <option value="critical">Critical only (Strict)</option>
+                        <option value="high">High and above (Recommended)</option>
+                        <option value="medium">Medium and above</option>
+                        <option value="low">Low and above</option>
+                        <option value="info">All events including normal</option>
+                      </select>
+                      <small>Only events at or above this threshold trigger analyst alert toasts</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Toast Auto-Dismiss Delay</span>
+                      <select id="setting-auto-dismiss-delay">
+                        <option value="3">3 seconds (Quick)</option>
+                        <option value="5" selected>5 seconds (Standard)</option>
+                        <option value="8">8 seconds (Extended)</option>
+                        <option value="0">Persistent (Until manually clicked)</option>
+                      </select>
+                      <small>Duration before notification messages automatically fade</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-enable-notifications" checked>
+                      <div class="toggle-content">
+                        <strong>Enable In-App Notifications</strong>
+                        <span>Display floating toast alerts for threats and operational changes</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-notification-sound">
+                      <div class="toggle-content">
+                        <strong>Notification Audio Chime</strong>
+                        <span>Play an audible synthetic chime when a critical alert is flagged</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-browser-notifications">
+                      <div class="toggle-content">
+                        <strong>Browser Desktop Notifications</strong>
+                        <span>Trigger native desktop notifications when browser tab is in background</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-keep-alerts-until-ack">
+                      <div class="toggle-content">
+                        <strong>Pin Critical Alerts Until Acknowledged</strong>
+                        <span>Keep high-severity threat toasts on screen until explicitly clicked</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="settings-inline-action">
+                    <button type="button" class="button button-secondary" id="test-notification-btn">🔔 Trigger Test Notification</button>
+                    <span class="field-hint">Emulates an alert toast to verify sound and visual configuration</span>
+                  </div>
+
+                  <!-- Notification History Panel -->
+                  <div class="notif-history-container">
+                    <div class="notif-history-header">
+                      <div>
+                        <h4>Notification Event Buffer</h4>
+                        <span style="font-size: 11px; color: var(--muted);">Recently delivered security alerts and operator notifications</span>
+                      </div>
+                      <button type="button" class="button button-sm button-secondary text-red" id="clear-notif-history-btn">🗑 Clear History</button>
+                    </div>
+                    <div class="notif-history-list" id="notif-history-list">
+                      <div class="empty-state small-empty" style="padding: 10px;">No recent notification alerts in buffer.</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 5: DETECTION & MODEL SETTINGS -->
+              <article class="panel settings-section-card" id="setsec-detection" data-section="detection">
+                <div class="panel-header">
+                  <div>
+                    <h3>5. Detection &amp; Model Parameters</h3>
+                    <p>Confidence thresholds, alert sensitivity, and transparent machine learning engine specifications</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="detection">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <!-- Engine Disclosure Card -->
+                  <div class="notice-banner">
+                    <div class="notice-icon">ⓘ</div>
+                    <div class="notice-copy">
+                      <strong>Operational Engine Disclosures</strong>
+                      <p>THREATNEX executes classification inference on 12 connection summary vectors using a scikit-learn RandomForest model trained on NSL-KDD. Changing UI thresholds adjusts alerting sensitivity only; it does NOT alter underlying model weights or invent synthetic detections.</p>
+                    </div>
+                  </div>
+
+                  <!-- Model Specification & Verification Panel -->
+                  <div class="tech-list" style="margin: 14px 0; background: var(--surface-2); padding: 14px; border-radius: 8px; border: 1px solid var(--border-soft);">
+                    <div><span>Model Architecture</span><strong>RandomForestClassifier (100 Trees)</strong></div>
+                    <div><span>Model Binary Availability</span><strong class="text-green" id="det-model-availability">Loaded (model.joblib, ~27.4 MB)</strong></div>
+                    <div><span>Evaluation Benchmark</span><strong>NSL-KDD Standardized Test Partition (22,544 vectors)</strong></div>
+                    <div><span>Evaluation Metrics</span><strong class="text-green">Accuracy: 99.8% | F1 Score: 99.8% | Precision: 99.8%</strong></div>
+                    <div><span>Input Features (12)</span><span style="font-family:monospace; font-size:11px; color:var(--cyan);">duration, protocol_type, service, flag, src_bytes, dst_bytes, count, srv_count, same_srv_rate, diff_srv_rate, dst_host_count, dst_host_srv_count</span></div>
+                    <div><span>Output Attack Classes (5)</span><span style="font-family:monospace; font-size:11px; color:var(--text);">normal, dos, probe, r2l, u2r</span></div>
+                    <div><span>Model File Timestamp</span><strong id="det-model-timestamp">Loaded &amp; verified</strong></div>
+                    <div><span>Operating Mode</span><strong style="color:var(--orange);">Vector summary inference (No raw packet sniffing / No TLS decryption)</strong></div>
+                  </div>
+
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Minimum Alert Confidence (%)</span>
+                      <input type="number" id="setting-min-alert-confidence" min="50" max="99" value="70">
+                      <small>Predictions below this percentage are flagged as low-confidence</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Alert Sensitivity Mode</span>
+                      <select id="setting-alert-threshold-mode">
+                        <option value="lenient">Lenient (≥50% Confidence - Broader)</option>
+                        <option value="balanced" selected>Balanced (≥70% Confidence - Default)</option>
+                        <option value="strict">Strict (≥85% Confidence - High Certainty)</option>
+                      </select>
+                      <small>Preset profile governing triage alert generation</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Severity Filter</span>
+                      <select id="setting-default-severity-filter">
+                        <option value="all">All Severities</option>
+                        <option value="critical">Critical Severities Only</option>
+                        <option value="high">High &amp; Above</option>
+                      </select>
+                      <small>Default classification threshold applied to feeds</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-confidence-percentage" checked>
+                      <div class="toggle-content">
+                        <strong>Display Confidence as Percentage</strong>
+                        <span>Render model decision certainty (e.g. 98.4%) across badges and investigation modals</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Detection Policy & Threshold Governance Controls (Phase 3.3) -->
+                  <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-soft);">
+                    <div style="font-weight: 600; color: var(--text-bright); margin-bottom: 4px;">Detection Policy &amp; Candidate Model Governance</div>
+                    <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 12px;">
+                      Safely evaluate probability threshold decision rules and candidate models with automatic fallback.
+                    </p>
+                    <div class="form-grid-2col">
+                      <label class="field">
+                        <span>Active Detection Policy</span>
+                        <select id="setting-detection-policy">
+                          <option value="legacy" selected>Legacy (Production Model — Argmax Baseline)</option>
+                          <option value="shadow">Shadow Mode (Authoritative Legacy + Candidate Validation)</option>
+                          <option value="experimental">Experimental (Candidate Model — Brute-Force Threshold Override)</option>
+                        </select>
+                        <small>In Shadow mode, production model remains authoritative while candidate runs in background.</small>
+                      </label>
+
+                      <label class="field">
+                        <span>Brute-Force Probability Threshold (&tau;)</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                          <input type="number" id="setting-bf-probability-threshold" min="0.05" max="0.95" step="0.01" value="0.35" style="width: 110px;">
+                          <span style="font-size: 11px; color: var(--cyan); font-family: monospace;">Calibrated: 0.35</span>
+                        </div>
+                        <small>Assigns brute_force when P(brute_force) &ge; &tau;. Validated &tau;=0.35 achieves 20.45% recall with &le;0.10% FPR.</small>
+                      </label>
+                    </div>
+
+                    <!-- Candidate Model Specification Panel -->
+                    <div class="tech-list" style="margin: 12px 0 0 0; background: var(--surface-2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-soft);">
+                      <div><span>Candidate Model Binary</span><strong class="text-green" id="cand-model-availability">Loaded (model_candidate.joblib, 150 Trees)</strong></div>
+                      <div><span>Validation Calibration</span><strong>Phase 3.2 Stratified Partition-Tuned (Held-Out Test Acc: 79.76%)</strong></div>
+                      <div><span>Brute-Force Recall Gain</span><strong class="text-cyan">20.45% Recall @ 97.73% Precision (vs 8.63% Legacy Argmax)</strong></div>
+                      <div><span>Safety Guarantee</span><strong style="color:var(--green);">Automatic fallback to production model.joblib if candidate file is inaccessible</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 6: QUERY CENTER PREFERENCES -->
+              <article class="panel settings-section-card" id="setsec-query" data-section="query">
+                <div class="panel-header">
+                  <div>
+                    <h3>6. Query Center Preferences</h3>
+                    <p>Default threat-hunting workspace parameters, default sorting, and export formatting</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="query">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Default Search Time Range</span>
+                      <select id="setting-default-search-time">
+                        <option value="all">All Time (Unconstrained)</option>
+                        <option value="1h">Past 1 Hour</option>
+                        <option value="6h">Past 6 Hours</option>
+                        <option value="24h">Past 24 Hours</option>
+                        <option value="7d">Past 7 Days</option>
+                        <option value="30d">Past 30 Days</option>
+                      </select>
+                      <small>Initial timeframe selected in the Query Center</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Query Page Size</span>
+                      <select id="setting-default-query-page-size">
+                        <option value="10">10 results per page</option>
+                        <option value="20" selected>20 results per page</option>
+                        <option value="50">50 results per page</option>
+                        <option value="100">100 results per page</option>
+                      </select>
+                      <small>Server-side pagination limit for threat hunting queries</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Sort Column</span>
+                      <select id="setting-default-sort-column">
+                        <option value="id" selected>Event ID</option>
+                        <option value="ts">Timestamp</option>
+                        <option value="severity">Severity Score</option>
+                        <option value="confidence">Model Confidence</option>
+                        <option value="src_ip">Source IP</option>
+                        <option value="label">Attack Classification</option>
+                      </select>
+                      <small>Primary ordering field for search results</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Default Sort Direction</span>
+                      <select id="setting-default-sort-order">
+                        <option value="DESC" selected>Descending (Newest / Highest First)</option>
+                        <option value="ASC">Ascending (Oldest / Lowest First)</option>
+                      </select>
+                      <small>Direction applied to the default query column</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Severity Filter</span>
+                      <select id="setting-default-query-severity">
+                        <option value="all">All Severities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                      </select>
+                      <small>Pre-filtered severity when opening Query Center</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Attack Label Filter</span>
+                      <select id="setting-default-query-label">
+                        <option value="all">All Attack Classes</option>
+                        <option value="dos">DoS (Denial of Service)</option>
+                        <option value="probe">Probe (Reconnaissance)</option>
+                        <option value="brute_force">Brute Force</option>
+                        <option value="normal">Normal Baseline</option>
+                      </select>
+                      <small>Pre-selected threat category filter</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-2col">
+                    <label class="field">
+                      <span>CSV Export Delimiter</span>
+                      <select id="setting-export-delimiter">
+                        <option value=",">Comma (,) - Standard</option>
+                        <option value=";">Semicolon (;) - European Excel</option>
+                        <option value="&#9;">Tab (\t) - TSV</option>
+                      </select>
+                      <small>Character separating data columns in exported reports</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-remember-last-filters" checked>
+                      <div class="toggle-content">
+                        <strong>Remember Last Search Filters</strong>
+                        <span>Retain active search filters during the current browser session</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-remember-query-page-size" checked>
+                      <div class="toggle-content">
+                        <strong>Remember Selected Page Size</strong>
+                        <span>Preserve chosen result row count across query executions</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-query-show-optional-columns" checked>
+                      <div class="toggle-content">
+                        <strong>Show Optional Network Feature Columns</strong>
+                        <span>Display duration, service, and flag attributes directly in query result tables</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-confirm-large-export" checked>
+                      <div class="toggle-content">
+                        <strong>Confirm Large CSV Exports</strong>
+                        <span>Prompt confirmation when exporting query result sets exceeding 1,000 records</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 7: EVENT MANAGEMENT -->
+              <article class="panel settings-section-card" id="setsec-events" data-section="events">
+                <div class="panel-header">
+                  <div>
+                    <h3>7. Event Management &amp; Investigation</h3>
+                    <p>Incident triage workflows, case management defaults, and inspection modal behaviors</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="events">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-2col">
+                    <label class="field">
+                      <span>Default Investigation Status Filter</span>
+                      <select id="setting-default-investigation-status">
+                        <option value="all">All Statuses</option>
+                        <option value="new">New (Uninvestigated Only)</option>
+                        <option value="investigating">Under Investigation</option>
+                        <option value="resolved">Resolved Cases</option>
+                        <option value="false_positive">False Positives</option>
+                      </select>
+                      <small>Default lifecycle stage shown in the Investigations Registry</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Event Sorting</span>
+                      <select id="setting-default-event-sort">
+                        <option value="id_desc" selected>Newest First (ID Descending)</option>
+                        <option value="id_asc">Oldest First (ID Ascending)</option>
+                        <option value="sev_desc">Highest Severity First</option>
+                        <option value="conf_desc">Highest Confidence First</option>
+                      </select>
+                      <small>Initial ordering applied across event triage views</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Event Detail Presentation</span>
+                      <select id="setting-event-detail-layout">
+                        <option value="modal" selected>Modal Dialog (Centered Overlay)</option>
+                        <option value="drawer">Side Drawer (Persistent Context)</option>
+                      </select>
+                      <small>Visual layout when inspecting connection forensics</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default Investigation View</span>
+                      <select id="setting-default-investigation-view">
+                        <option value="all" selected>All Investigation Incidents</option>
+                        <option value="priority">Priority Incidents Only</option>
+                        <option value="assigned_to_me">My Assigned Incidents</option>
+                      </select>
+                      <small>Initial filter preset for case management</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-confirm-event-resolve" checked>
+                      <div class="toggle-content">
+                        <strong>Confirm Case Resolution</strong>
+                        <span>Prompt confirmation before marking security incidents as Resolved or False Positive</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-show-feature-details-by-default">
+                      <div class="toggle-content">
+                        <strong>Expand 12 Feature Values by Default</strong>
+                        <span>Automatically show network feature table expanded when opening the event modal</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-preserve-query-on-modal-close" checked>
+                      <div class="toggle-content">
+                        <strong>Preserve Query Filters on Modal Dismiss</strong>
+                        <span>Maintain search filters and scroll position after closing event details</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 8: DATA & RETENTION -->
+              <article class="panel settings-section-card" id="setsec-data" data-section="data">
+                <div class="panel-header">
+                  <div>
+                    <h3>8. Data Management &amp; Retention</h3>
+                    <p>Database storage diagnostics, retention policy enforcement, and authorized cleanup tools</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="data">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <!-- Storage Diagnostics Card -->
+                  <div class="source-stats-grid">
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Database Status</span>
+                      <strong class="src-stat-value text-green" id="db-stat-status">Connected</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Stored Events</span>
+                      <strong class="src-stat-value" id="db-stat-total-events">—</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Database Footprint</span>
+                      <strong class="src-stat-value" id="db-stat-size">—</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Database Engine</span>
+                      <strong class="src-stat-value">SQLite 3.x</strong>
+                    </div>
+                  </div>
+
+                  <div class="form-grid-2col" style="margin-top: 16px;">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-retention-policy-enabled">
+                      <div class="toggle-content">
+                        <strong>Enable Automatic Retention Window</strong>
+                        <span>Prune telemetry older than the specified retention window (Disabled by default)</span>
+                      </div>
+                    </label>
+
+                    <label class="field">
+                      <span>Retention Period</span>
+                      <select id="setting-retention-days">
+                        <option value="30">30 Days</option>
+                        <option value="60">60 Days</option>
+                        <option value="90" selected>90 Days (Quarterly)</option>
+                        <option value="180">180 Days (Semi-Annual)</option>
+                        <option value="365">365 Days (1 Year)</option>
+                      </select>
+                      <small>Historical events older than this threshold will be marked for cleanup</small>
+                    </label>
+                  </div>
+
+                  <!-- Destructive Cleanup Box -->
+                  <div class="danger-zone-box" style="margin-top: 20px;">
+                    <div class="danger-zone-header">
+                      <strong>Authorized Historical Telemetry Cleanup</strong>
+                      <p>Manually prune older events based on the retention window. This operation ONLY prunes historical event rows. User accounts, settings, and ML model weights are strictly preserved.</p>
+                    </div>
+                    <button type="button" class="button button-secondary text-red" id="execute-data-cleanup-btn">🗑 Execute Retention Cleanup</button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 9: EXPORT & REPORTS -->
+              <article class="panel settings-section-card" id="setsec-export" data-section="export">
+                <div class="panel-header">
+                  <div>
+                    <h3>9. Export &amp; Report Preferences</h3>
+                    <p>Default file formats, CSV delimiters, filename prefixes, and report date ranges</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="export">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Default Export Format</span>
+                      <select id="setting-default-export-format">
+                        <option value="csv">CSV (Comma-Separated Values)</option>
+                        <option value="json">JSON (Structured Payload)</option>
+                      </select>
+                      <small>Primary format used when clicking export actions</small>
+                    </label>
+
+                    <label class="field">
+                      <span>CSV Delimiter Character</span>
+                      <select id="setting-csv-delimiter">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="&#9;">Tab (\t)</option>
+                      </select>
+                      <small>Delimiter used when formatting CSV outputs</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Export Timestamp Format</span>
+                      <select id="setting-timestamp-export-format">
+                        <option value="iso8601">ISO 8601 UTC (2026-10-30T14:30:00Z)</option>
+                        <option value="unix_epoch">Unix Epoch Seconds (1761834600)</option>
+                        <option value="readable">Human Readable Local Time</option>
+                      </select>
+                      <small>Timestamp representation in exported files</small>
+                    </label>
+                  </div>
+
+                  <div class="form-grid-2col">
+                    <label class="field">
+                      <span>Export Filename Prefix</span>
+                      <input type="text" id="setting-export-filename-prefix" placeholder="threatnex_events" maxlength="30" value="threatnex_events">
+                      <small>Prefix used when generating downloadable filenames</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Default SOC Report Date Range</span>
+                      <select id="setting-default-report-date-range">
+                        <option value="7d">Past 7 Days</option>
+                        <option value="30d" selected>Past 30 Days (Default)</option>
+                        <option value="all">All Historical Records</option>
+                      </select>
+                      <small>Default timeframe analyzed when loading SOC Reports</small>
+                    </label>
+                  </div>
+
+                  <div class="toggle-group-grid">
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-include-confidence" checked>
+                      <div class="toggle-content">
+                        <strong>Include Confidence in Exports</strong>
+                        <span>Include percentage confidence column in exported datasets</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-include-severity-label" checked>
+                      <div class="toggle-content">
+                        <strong>Include Severity &amp; Attack Label</strong>
+                        <span>Export classified threat level and attack taxonomy name</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-include-event-id" checked>
+                      <div class="toggle-content">
+                        <strong>Include Event ID Column</strong>
+                        <span>Include unique primary key identifier in export records</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-include-features" checked>
+                      <div class="toggle-content">
+                        <strong>Include Network Features in Exports</strong>
+                        <span>Include raw 12 input features in exported rows</span>
+                      </div>
+                    </label>
+
+                    <label class="toggle-card">
+                      <input type="checkbox" id="setting-include-filter-summary" checked>
+                      <div class="toggle-content">
+                        <strong>Include Applied Filter Summary</strong>
+                        <span>Show applied query criteria banner in export metadata</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 10: SECURITY & PRIVACY -->
+              <article class="panel settings-section-card" id="setsec-security" data-section="security">
+                <div class="panel-header">
+                  <div>
+                    <h3>10. Security &amp; Privacy</h3>
+                    <p>Current authentication status, CSRF tokens, session controls, and password updates</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="security">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <!-- Active Security Status Grid -->
+                  <div class="source-stats-grid">
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">User ID</span>
+                      <strong class="src-stat-value" id="sec-user-id">#1</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Authenticated Account</span>
+                      <strong class="src-stat-value" id="sec-username">—</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">Assigned Role</span>
+                      <strong class="src-stat-value text-accent" id="sec-role">—</strong>
+                    </div>
+                    <div class="src-stat-box">
+                      <span class="src-stat-label">CSRF Protection</span>
+                      <strong class="src-stat-value text-green" id="sec-csrf-status">Active (X-CSRF-Token)</strong>
+                    </div>
+                  </div>
+
+                  <!-- Change Password Form -->
+                  <div class="security-password-card" style="margin-top: 20px;">
+                    <div class="panel-header" style="padding: 0 0 12px 0;">
+                      <div>
+                        <h4>Update Account Password</h4>
+                        <p>Change your authenticated session password. Passwords are securely hashed with scikit-werkzeug PBKDF2-SHA256.</p>
+                      </div>
+                    </div>
+                    <div class="form-grid-3col">
+                      <label class="field">
+                        <span>Current Password</span>
+                        <input type="password" id="chg-current-password" placeholder="••••••••" autocomplete="current-password">
+                      </label>
+                      <label class="field">
+                        <span>New Password</span>
+                        <input type="password" id="chg-new-password" placeholder="Min 6 characters" autocomplete="new-password">
+                      </label>
+                      <label class="field">
+                        <span>Confirm New Password</span>
+                        <input type="password" id="chg-confirm-password" placeholder="Re-enter new password" autocomplete="new-password">
+                      </label>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; align-items: center; gap: 14px;">
+                      <button type="button" class="button button-primary" id="chg-password-btn">Update Password</button>
+                      <span id="chg-password-status" style="font-size: 13px;"></span>
+                    </div>
+                  </div>
+
+                  <div class="notice-banner" style="margin-top: 16px;">
+                    <div class="notice-icon">🔒</div>
+                    <div class="notice-copy">
+                      <strong>Access &amp; Role Control Policy</strong>
+                      <p>Role modifications and administrative privileges are managed through the central security policy database. Self-service privilege escalation is strictly restricted by backend authentication gates.</p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 11: ACCOUNT & PROFILE -->
+              <article class="panel settings-section-card" id="setsec-account" data-section="account">
+                <div class="panel-header">
+                  <div>
+                    <h3>11. Account &amp; Profile</h3>
+                    <p>Analyst identity, personal defaults, display signature, and session termination</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary reset-sec-btn" data-sec="account">↺ Reset Section</button>
+                </div>
+                <div class="settings-form">
+                  <div class="form-grid-3col">
+                    <label class="field">
+                      <span>Account Username</span>
+                      <input type="text" id="profile-username-display" readonly disabled value="—">
+                      <small>Immutable login account username</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Assigned Security Role</span>
+                      <input type="text" id="profile-role-display" readonly disabled value="—">
+                      <small>Security access classification level</small>
+                    </label>
+
+                    <label class="field">
+                      <span>Profile Display Name</span>
+                      <input type="text" id="profile-display-name-input" placeholder="Display Name" maxlength="50">
+                      <small>Public alias shown in logs and reports</small>
+                    </label>
+                  </div>
+
+                  <div class="settings-actions-bar" style="margin-top: 20px;">
+                    <button type="button" class="button button-primary" id="save-profile-btn">✦ Save Profile</button>
+                    <button type="button" class="button button-secondary text-red" id="reset-personal-prefs-btn">↺ Reset My Preferences to Factory Defaults</button>
+                    <button type="button" class="button button-secondary" id="profile-signout-btn">Sign Out</button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SECTION 12: SYSTEM INFORMATION -->
+              <article class="panel settings-section-card" id="setsec-system" data-section="system">
+                <div class="panel-header">
+                  <div>
+                    <h3>12. System Information</h3>
+                    <p>Verified environment runtime, library versions, database connection, and operational mode</p>
+                  </div>
+                  <button type="button" class="button button-sm button-secondary" id="refresh-sysinfo-btn">↻ Refresh Diagnostics</button>
+                </div>
+                <div class="settings-form">
+                  <div class="tech-list" style="margin-bottom: 20px;">
+                    <div><span>Platform Version</span><strong id="sysinfo-platform">THREATNEX AI-IDS v2.4.0 (Enterprise SOC Edition)</strong></div>
+                    <div><span>Python Runtime</span><strong id="sysinfo-python">Python 3.12+</strong></div>
+                    <div><span>Host Environment</span><strong id="sysinfo-os">Windows (SOC Host)</strong></div>
+                    <div><span>Web Server</span><strong id="sysinfo-flask">Flask 3.x (WSGI Server)</strong></div>
+                    <div><span>Machine Learning Library</span><strong id="sysinfo-sklearn">Scikit-learn</strong></div>
+                    <div><span>Detection Engine</span><strong id="sysinfo-model">RandomForestClassifier (100 Trees)</strong></div>
+                    <div><span>Model File Status</span><strong id="sysinfo-modelfile">model.joblib (Ready)</strong></div>
+                    <div><span>Candidate Model File</span><strong id="sysinfo-candidate-model" class="text-green">model_candidate.joblib (150 Trees, Ready)</strong></div>
+                    <div><span>Active Detection Policy</span><strong id="sysinfo-policy" class="text-cyan">Legacy (Argmax Baseline)</strong></div>
+                    <div><span>Feature Vector Dimension</span><strong id="sysinfo-features">12 Connection Summary Attributes</strong></div>
+                    <div><span>Evaluation Partition</span><strong id="sysinfo-dataset">NSL-KDD Standardized Test Partition</strong></div>
+                    <div><span>Evaluation Accuracy</span><strong id="sysinfo-accuracy" class="text-green">99.8%</strong></div>
+                    <div><span>Evaluation F1 Score</span><strong id="sysinfo-f1" class="text-green">99.8%</strong></div>
+                    <div><span>Database Engine</span><strong id="sysinfo-db">SQLite3 (Thread-Safe Transactional)</strong></div>
+                    <div><span>Verified Backup Status</span><strong id="sysinfo-backup" class="text-green">Verified Backup Active</strong></div>
+                  </div>
+
+                  <div class="notice-banner">
+                    <div class="notice-icon">ℹ</div>
+                    <div class="notice-copy">
+                      <strong>Architectural Disclosures &amp; Boundaries</strong>
+                      <ul style="margin: 6px 0 0 16px; padding: 0; line-height: 1.6;">
+                        <li>Telemetry inference is performed strictly on connection summary feature vectors (e.g. durations, byte volumes, error rates).</li>
+                        <li>No raw promiscuous network interface card packet tap or kernel packet capture driver is active.</li>
+                        <li>Encrypted application payloads (TLS/HTTPS) are not decrypted or intercepted.</li>
+                        <li>No automated external firewall or routing table rule mutations are enacted without operator verification.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- QUERY CENTER -->
+        <section class="page" id="page-query">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> THREAT HUNTING WORKSPACE</div>
+              <h1>Query Center<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Search, filter, build custom query conditions, and batch-triage security events across all recorded traffic.</p>
+            </div>
+          </div>
+
+          <!-- HUNTING PRESETS -->
+          <article class="panel query-presets-panel">
+            <div class="panel-header">
+              <div>
+                <h3>Quick Threat-Hunting Presets</h3>
+                <p>One-click filters for common SOC triage workflows</p>
+              </div>
+              <span class="panel-chip">PRESETS</span>
+            </div>
+            <div class="presets-toolbar">
+              <button class="preset-btn active" data-preset="all">All Events</button>
+              <button class="preset-btn" data-preset="critical_high">Critical & High Threats</button>
+              <button class="preset-btn" data-preset="recent_threats">Recent Threats</button>
+              <button class="preset-btn" data-preset="needs_investigation">Needs Investigation</button>
+              <button class="preset-btn" data-preset="low_conf">Low Confidence (&lt;70%)</button>
+              <button class="preset-btn" data-preset="false_positives">False Positives</button>
+              <button class="preset-btn" data-preset="normal">Normal Traffic</button>
+            </div>
+          </article>
+
+          <!-- SAVED SEARCHES BAR -->
+          <article class="panel saved-queries-panel" style="margin-top: 14px;">
+            <div class="saved-queries-bar">
+              <div class="saved-queries-left">
+                <span class="saved-label">Saved Searches:</span>
+                <select id="saved-queries-select" class="saved-select">
+                  <option value="">— Select a saved search query —</option>
+                </select>
+                <button class="button button-sm button-secondary" id="load-saved-query-btn">Apply</button>
+                <button class="button button-sm button-secondary text-red" id="delete-saved-query-btn" title="Delete selected saved search">✕</button>
+              </div>
+              <div class="saved-queries-right">
+                <button class="button button-sm button-secondary" id="open-save-query-modal-btn">💾 Save Current Filters</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- ADVANCED FILTER BUILDER -->
+          <article class="panel query-builder-panel" style="margin-top: 14px;">
+            <div class="panel-header">
+              <div>
+                <h3>Advanced Filter Builder</h3>
+                <p>Build structured multi-condition queries with field parameterization</p>
+              </div>
+              <span class="panel-chip">QUERY BUILDER</span>
+            </div>
+
+            <div class="query-builder-form">
+              <div class="form-grid-advanced">
+                <label class="field">
+                  <span>Free-text Search</span>
+                  <input type="text" id="query-search" placeholder="Search IP, label, severity, analyst notes...">
+                </label>
+                <label class="field">
+                  <span>Source IP Address</span>
+                  <input type="text" id="query-ip" placeholder="e.g. 192.168.1.50">
+                </label>
+                <label class="field">
+                  <span>Classification</span>
+                  <select id="query-label">
+                    <option value="all">All Classifications</option>
+                    <option value="normal">Normal (Benign)</option>
+                    <option value="dos">Denial of Service (DoS)</option>
+                    <option value="probe">Port Probe / Sweep</option>
+                    <option value="brute_force">SSH / Auth Brute Force</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Severity</span>
+                  <select id="query-severity">
+                    <option value="all">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                    <option value="none">None (Normal)</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Investigation Status</span>
+                  <select id="query-status">
+                    <option value="all">All Statuses</option>
+                    <option value="new">New (Unassigned)</option>
+                    <option value="investigating">Under Investigation</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="false_positive">False Positive</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Relative Time</span>
+                  <select id="query-time-preset">
+                    <option value="">Any time</option>
+                    <option value="1h">Last 1 Hour</option>
+                    <option value="24h">Last 24 Hours</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Custom Start Date/Time</span>
+                  <input type="datetime-local" id="query-date-from">
+                </label>
+                <label class="field">
+                  <span>Custom End Date/Time</span>
+                  <input type="datetime-local" id="query-date-to">
+                </label>
+                <label class="field">
+                  <span>Min Confidence (%)</span>
+                  <input type="number" id="query-min-conf" min="0" max="100" placeholder="0">
+                </label>
+                <label class="field">
+                  <span>Max Confidence (%)</span>
+                  <input type="number" id="query-max-conf" min="0" max="100" placeholder="100">
+                </label>
+                <label class="field">
+                  <span>Sort Column</span>
+                  <select id="query-sort-by">
+                    <option value="id">Event ID</option>
+                    <option value="ts">Timestamp</option>
+                    <option value="severity">Severity</option>
+                    <option value="confidence">Confidence</option>
+                    <option value="status">Investigation Status</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Sort Order</span>
+                  <select id="query-sort-order">
+                    <option value="desc">Newest First (Descending)</option>
+                    <option value="asc">Oldest First (Ascending)</option>
+                  </select>
+                </label>
+              </div>
+
+              <!-- ACTIVE FILTER CHIPS -->
+              <div class="active-chips-container" id="active-filter-chips">
+                <!-- Populated dynamically by JS -->
+              </div>
+
+              <div class="query-actions-bar">
+                <div class="actions-left">
+                  <button class="button button-primary" id="run-query">⌕ Run Query</button>
+                  <button class="button button-secondary" id="clear-query">✕ Clear Filters</button>
+                </div>
+                <div class="actions-right">
+                  <button class="button button-secondary" id="export-filtered-csv-btn">↓ Export Filtered CSV</button>
+                  <button class="button button-secondary" id="export-csv-btn" title="Export all database events">↓ Export All Events (CSV)</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- RESULTS PANEL & BULK ACTIONS -->
+          <article class="panel results-panel" style="margin-top: 14px;">
+            <div class="panel-header results-header">
+              <div class="results-header-left">
+                <h3>Query Results</h3>
+                <span class="results-badge" id="query-results-count">0 events matched</span>
+              </div>
+              <div class="bulk-toolbar" id="bulk-toolbar" style="display: none;">
+                <span class="bulk-count" id="selected-count-badge">0 selected</span>
+                <select id="bulk-status-select" class="bulk-select">
+                  <option value="investigating">Mark as Investigating</option>
+                  <option value="resolved">Mark as Resolved</option>
+                  <option value="false_positive">Mark as False Positive</option>
+                  <option value="new">Mark as New</option>
+                </select>
+                <button class="button button-sm button-secondary" id="bulk-apply-status-btn">Apply</button>
+                <button class="button button-sm button-secondary" id="export-selected-csv-btn">↓ Export Selected</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table id="query-table">
+                <thead>
+                  <tr>
+                    <th style="width: 36px;"><input type="checkbox" id="select-all-query-rows" title="Select all on page"></th>
+                    <th>EVENT</th>
+                    <th>TIMESTAMP</th>
+                    <th>SOURCE IP</th>
+                    <th>CLASSIFICATION</th>
+                    <th>SEVERITY</th>
+                    <th>CONFIDENCE</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody id="query-results-body">
+                  <tr>
+                    <td colspan="9" class="table-empty">Loading events...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- SERVER-SIDE PAGINATION CONTROLS -->
+            <div class="pagination-bar" id="query-pagination-bar">
+              <div class="pagination-left">
+                <span>Rows per page:</span>
+                <select id="query-page-size" class="pagination-select">
+                  <option value="10">10</option>
+                  <option value="20" selected>20</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span id="query-pagination-info" class="pagination-info">Showing 0-0 of 0</span>
+              </div>
+              <div class="pagination-right">
+                <button class="button button-sm button-secondary" id="query-prev-page" disabled>← Previous</button>
+                <span class="page-badge" id="query-page-display">Page 1 of 1</span>
+                <button class="button button-sm button-secondary" id="query-next-page" disabled>Next →</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- INVESTIGATIONS CONSOLE -->
+        <section class="page" id="page-investigations">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> SOC INCIDENT MANAGEMENT</div>
+              <h1>Investigations Console<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Track, triage, annotate, and resolve network threat alerts throughout their incident lifecycle.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-secondary" id="refresh-investigations-btn">↻ Refresh Cases</button>
+            </div>
+          </div>
+
+          <!-- INVESTIGATION KPI TILES -->
+          <div class="stats-grid stats-grid-5" id="inv-widget-kpis">
+            <article class="stat-card clickable-stat" data-inv-filter="new">
+              <div class="stat-top">
+                <span class="stat-label">New / Open</span>
+                <span class="stat-icon icon-blue">●</span>
+              </div>
+              <div class="stat-value" id="inv-stat-new">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Awaiting analyst triage</span></div>
+              <div class="stat-decoration decoration-blue"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" data-inv-filter="investigating">
+              <div class="stat-top">
+                <span class="stat-label">Investigating</span>
+                <span class="stat-icon icon-purple">◐</span>
+              </div>
+              <div class="stat-value" id="inv-stat-investigating">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Under active triage</span></div>
+              <div class="stat-decoration decoration-purple"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" data-inv-filter="resolved">
+              <div class="stat-top">
+                <span class="stat-label">Resolved</span>
+                <span class="stat-icon icon-green">✓</span>
+              </div>
+              <div class="stat-value" id="inv-stat-resolved">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Mitigated threats</span></div>
+              <div class="stat-decoration decoration-green"></div>
+            </article>
+
+            <article class="stat-card clickable-stat" data-inv-filter="false_positive">
+              <div class="stat-top">
+                <span class="stat-label">False Positives</span>
+                <span class="stat-icon icon-orange">✕</span>
+              </div>
+              <div class="stat-value" id="inv-stat-false-positive">—</div>
+              <div class="stat-bottom"><span class="stat-caption">Classified as benign</span></div>
+              <div class="stat-decoration decoration-orange"></div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">Closure Rate</span>
+                <span class="stat-icon icon-green">◎</span>
+              </div>
+              <div class="stat-value" id="inv-stat-closure-rate">—<span class="value-unit">%</span></div>
+              <div class="stat-bottom"><span class="stat-caption">Resolution efficiency</span></div>
+              <div class="stat-decoration decoration-green"></div>
+            </article>
+          </div>
+
+          <!-- INVESTIGATION CASES TABLE -->
+          <article class="panel table-panel" style="margin-top: 18px;">
+            <div class="panel-header table-panel-header">
+              <div>
+                <h3>Case Management Registry</h3>
+                <p>Filter by status and update case notes in real time</p>
+              </div>
+              <div class="pill-group" id="inv-status-tabs">
+                <button class="pill-btn active" data-status="all">All Cases</button>
+                <button class="pill-btn" data-status="new">New</button>
+                <button class="pill-btn" data-status="investigating">Investigating</button>
+                <button class="pill-btn" data-status="resolved">Resolved</button>
+                <button class="pill-btn" data-status="false_positive">False Positive</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>CASE / ID</th>
+                    <th>TIMESTAMP</th>
+                    <th>SOURCE IP</th>
+                    <th>CLASSIFICATION</th>
+                    <th>SEVERITY</th>
+                    <th>STATUS</th>
+                    <th>ANALYST NOTES</th>
+                    <th>TRIAGE</th>
+                  </tr>
+                </thead>
+                <tbody id="investigations-table-body">
+                  <tr>
+                    <td colspan="8" class="table-empty">Loading cases...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- SOC REPORTS -->
+        <section class="page" id="page-reports">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> EXECUTIVE & TECHNICAL AUDIT</div>
+              <h1>SOC Incident Reports<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Consolidated operational telemetry, threat distribution analysis, and model verification audit.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-secondary" id="print-report-btn">🖶 Print / Save PDF</button>
+              <button class="button button-primary" id="report-export-csv-btn">↓ Export Full CSV</button>
+            </div>
+          </div>
+
+          <div class="report-container" id="printable-report">
+            <!-- REPORT METRICS HEADER -->
+            <article class="panel report-summary-card">
+              <div class="report-meta-header">
+                <div>
+                  <h2 class="report-title">THREATNEX Security Operations Center — Executive Summary</h2>
+                  <p class="report-subtitle">Generated on <strong id="report-timestamp">—</strong> | Classification Engine: RandomForest (NSL-KDD)</p>
+                </div>
+                <div class="report-seal">CONFIDENTIAL SOC AUDIT</div>
+              </div>
+
+              <div class="report-kpi-grid">
+                <div class="report-kpi-box">
+                  <span class="kpi-title">TOTAL EVENTS</span>
+                  <strong class="kpi-stat" id="rep-total">—</strong>
+                  <span class="kpi-sub">Total database records</span>
+                </div>
+                <div class="report-kpi-box">
+                  <span class="kpi-title">THREAT EVENTS</span>
+                  <strong class="kpi-stat text-red" id="rep-threats">—</strong>
+                  <span class="kpi-sub" id="rep-threat-pct">—% threat ratio</span>
+                </div>
+                <div class="report-kpi-box">
+                  <span class="kpi-title">BENIGN FLOWS</span>
+                  <strong class="kpi-stat text-green" id="rep-normal">—</strong>
+                  <span class="kpi-sub">Classified as normal</span>
+                </div>
+                <div class="report-kpi-box">
+                  <span class="kpi-title">CASES CLOSED</span>
+                  <strong class="kpi-stat text-purple" id="rep-closed">—</strong>
+                  <span class="kpi-sub">Resolved + False Positives</span>
+                </div>
+                <div class="report-kpi-box">
+                  <span class="kpi-title">RESOLUTION RATE</span>
+                  <strong class="kpi-stat text-blue" id="rep-resolution-rate">—%</strong>
+                  <span class="kpi-sub">SOC remediation rate</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- 2-COLUMN BREAKDOWN -->
+            <div class="dashboard-grid" style="margin-top: 18px;">
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Attack Classification Breakdown</h3>
+                    <p>Observed malicious events grouped by attack class</p>
+                  </div>
+                  <span class="panel-chip">ATTACK TYPES</span>
+                </div>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>CLASSIFICATION</th>
+                        <th>COUNT</th>
+                        <th>SHARE</th>
+                      </tr>
+                    </thead>
+                    <tbody id="report-attacks-tbody">
+                      <tr><td colspan="3" class="table-empty">Loading report...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Top Threat Actor IP Addresses</h3>
+                    <p>Origin IP addresses with the highest threat frequency</p>
+                  </div>
+                  <span class="panel-chip">ATTACKERS</span>
+                </div>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>SOURCE IP</th>
+                        <th>TOTAL</th>
+                        <th>THREATS</th>
+                        <th>ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody id="report-actors-tbody">
+                      <tr><td colspan="4" class="table-empty">Loading report...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </div>
+
+            <!-- UNRESOLVED HIGH-SEVERITY TABLE -->
+            <article class="panel table-panel" style="margin-top: 18px;">
+              <div class="panel-header">
+                <div>
+                  <h3>Priority Unresolved Incidents</h3>
+                  <p>Critical and high severity alerts that remain open</p>
+                </div>
+                <span class="panel-chip">ATTENTION NEEDED</span>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>EVENT</th>
+                      <th>SOURCE IP</th>
+                      <th>CLASSIFICATION</th>
+                      <th>SEVERITY</th>
+                      <th>CONFIDENCE</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-unresolved-tbody">
+                    <tr><td colspan="6" class="table-empty">Loading priority incidents...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <!-- MODEL AND DATASET SPECIFICATION -->
+            <article class="panel" style="margin-top: 18px;">
+              <div class="panel-header">
+                <div>
+                  <h3>Detection Engine &amp; Dataset Specification</h3>
+                  <p>Mathematical architecture and training parameters</p>
+                </div>
+                <span class="panel-chip">AUDIT SPEC</span>
+              </div>
+              <div class="spec-grid">
+                <div class="spec-item">
+                  <span class="spec-label">MODEL ARCHITECTURE</span>
+                  <strong>RandomForestClassifier (100 Decision Trees, Balanced Subsample)</strong>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">EVALUATION DATASET</span>
+                  <strong id="rep-model-eval-dataset">NSL-KDD Test+ Benchmark (22,544 rows, 12 features)</strong>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">MODEL ACCURACY</span>
+                  <strong id="rep-model-accuracy">—</strong>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">WEIGHTED F1 SCORE</span>
+                  <strong id="rep-model-f1">—</strong>
+                </div>
+              </div>
+              <div class="spec-disclosure">
+                <p><strong>Operational Architecture Disclosure:</strong> THREATNEX evaluates 12 aggregated connection features derived from NSL-KDD telemetry. The application does not claim live kernel-level packet capture, deep packet inspection of encrypted TLS SNI, or third-party commercial threat intelligence enrichment. All classifications reflect tabular feature vectors analyzed by the local machine learning model.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- SYSTEM HEALTH -->
+        <section class="page" id="page-health">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> SYSTEM TELEMETRY &amp; DIAGNOSTICS</div>
+              <h1>System Health<span class="title-period">.</span></h1>
+              <p class="page-subtitle">Verify database integrity, machine learning model availability, and simulate test attack scenarios.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button button-secondary" id="health-ping-btn">↻ Run Health Diagnostics</button>
+            </div>
+          </div>
+
+          <!-- DIAGNOSTICS TILES -->
+          <div class="stats-grid stats-grid-4">
+            <article class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">SQLite Database</span>
+                <span class="stat-icon icon-green">●</span>
+              </div>
+              <div class="stat-value" id="health-db-status">Connected</div>
+              <div class="stat-bottom"><span class="stat-caption" id="health-db-count">4 events recorded</span></div>
+              <div class="stat-decoration decoration-green"></div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">ML Inference Model</span>
+                <span class="stat-icon icon-purple">◎</span>
+              </div>
+              <div class="stat-value" id="health-model-status">Ready</div>
+              <div class="stat-bottom"><span class="stat-caption" id="health-model-classes">4 classes active</span></div>
+              <div class="stat-decoration decoration-purple"></div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">Flask API Engine</span>
+                <span class="stat-icon icon-blue">↗</span>
+              </div>
+              <div class="stat-value" id="health-api-status">Operational</div>
+              <div class="stat-bottom"><span class="stat-caption">Session CSRF Enabled</span></div>
+              <div class="stat-decoration decoration-blue"></div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">Round-Trip Latency</span>
+                <span class="stat-icon icon-green">⚡</span>
+              </div>
+              <div class="stat-value" id="health-latency">&lt; 5ms</div>
+              <div class="stat-bottom"><span class="stat-caption">Local SQLite / Flask</span></div>
+              <div class="stat-decoration decoration-green"></div>
+            </article>
+          </div>
+
+          <!-- TESTING & SIMULATOR CENTER -->
+          <article class="panel" style="margin-top: 18px;">
+            <div class="panel-header">
+              <div>
+                <h3>Sample-Event Simulator &amp; Test Telemetry</h3>
+                <p>Inject calibrated NSL-KDD test scenarios for demonstration without corrupting baseline records</p>
+              </div>
+              <span class="panel-chip">SIMULATOR</span>
+            </div>
+
+            <div class="simulator-scenarios-grid">
+              <div class="scenario-card">
+                <div class="scenario-header">
+                  <span class="scenario-badge critical">CRITICAL</span>
+                  <h4>DoS SYN Flood Simulation</h4>
+                </div>
+                <p class="scenario-desc">Simulates a high-volume SYN flood attack against port 80 with high count and high serror rates.</p>
+                <div class="scenario-footer">
+                  <span class="scenario-mode">Flag: simulated=true</span>
+                  <button class="button button-sm button-secondary trigger-scenario-btn" data-scenario="dos">⚡ Trigger DoS</button>
+                </div>
+              </div>
+
+              <div class="scenario-card">
+                <div class="scenario-header">
+                  <span class="scenario-badge medium">MEDIUM</span>
+                  <h4>Port Sweep Probe Simulation</h4>
+                </div>
+                <p class="scenario-desc">Simulates horizontal port reconnaissance with low same-service rates across target IP endpoints.</p>
+                <div class="scenario-footer">
+                  <span class="scenario-mode">Flag: simulated=true</span>
+                  <button class="button button-sm button-secondary trigger-scenario-btn" data-scenario="probe">⚡ Trigger Probe</button>
+                </div>
+              </div>
+
+              <div class="scenario-card">
+                <div class="scenario-header">
+                  <span class="scenario-badge high">HIGH</span>
+                  <h4>SSH Brute Force Simulation</h4>
+                </div>
+                <p class="scenario-desc">Simulates credential stuffing attempts characterized by high server connection counts and auth anomalies.</p>
+                <div class="scenario-footer">
+                  <span class="scenario-mode">Flag: simulated=true</span>
+                  <button class="button button-sm button-secondary trigger-scenario-btn" data-scenario="brute_force">⚡ Trigger Brute Force</button>
+                </div>
+              </div>
+
+              <div class="scenario-card">
+                <div class="scenario-header">
+                  <span class="scenario-badge green">NORMAL</span>
+                  <h4>Benign Web Traffic Flow</h4>
+                </div>
+                <p class="scenario-desc">Simulates standard HTTP/HTTPS browsing sessions with high same-srv rates and zero error flags.</p>
+                <div class="scenario-footer">
+                  <span class="scenario-mode">Flag: simulated=true</span>
+                  <button class="button button-sm button-secondary trigger-scenario-btn" data-scenario="normal">✓ Trigger Normal Flow</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- EVENT INVESTIGATION MODAL -->
+        <div class="modal-backdrop" id="event-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+          <div class="modal-card">
+            <div class="modal-header">
+              <div class="modal-header-info">
+                <span class="modal-eyebrow">EVENT INVESTIGATION CONSOLE</span>
+                <h3 id="modal-event-title">Event #<span id="modal-event-id">—</span></h3>
+              </div>
+              <button class="modal-close-btn" id="modal-close-btn" aria-label="Close investigation modal">✕</button>
+            </div>
+            <div class="modal-body" id="modal-event-body">
+              <div class="investigation-hero">
+                <div class="hero-chip-group">
+                  <span id="modal-classification-badge"></span>
+                  <span id="modal-severity-badge"></span>
+                  <span id="modal-confidence-badge" class="confidence-badge"></span>
+                  <span id="modal-policy-badge" style="display:none;"></span>
+                </div>
+                <div class="hero-meta-grid">
+                  <div class="meta-item">
+                    <span class="meta-label">SOURCE IP</span>
+                    <strong class="meta-value ip-address" id="modal-src-ip">—</strong>
+                    <button class="button button-sm button-secondary" id="modal-view-src-btn" style="margin-top: 4px; padding: 2px 8px; font-size: 11px;">View IP Profile</button>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">TIMESTAMP</span>
+                    <strong class="meta-value" id="modal-timestamp">—</strong>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">DETECTION SOURCE</span>
+                    <span class="meta-badge" id="modal-source-mode">NSL-KDD Ingestion</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- INVESTIGATION STATUS & NOTES EDITOR -->
+              <div class="investigation-section triage-editor-section">
+                <div class="section-title-row">
+                  <h4>Analyst Triage &amp; Case Notes</h4>
+                  <span class="panel-chip">CASE STATUS</span>
+                </div>
+                <div class="triage-controls-grid">
+                  <label class="field">
+                    <span>Investigation Status</span>
+                    <select id="modal-inv-status" class="status-select">
+                      <option value="new">New (Unassigned)</option>
+                      <option value="investigating">Under Active Investigation</option>
+                      <option value="resolved">Resolved (Mitigated)</option>
+                      <option value="false_positive">False Positive</option>
+                    </select>
+                  </label>
+                  <label class="field" style="grid-column: 1 / -1;">
+                    <span>Analyst Notes &amp; Remediation Details</span>
+                    <textarea id="modal-analyst-notes" rows="3" placeholder="Enter findings, root-cause notes, containment steps, or triage rationale..."></textarea>
+                  </label>
+                </div>
+                <div class="triage-action-row">
+                  <button class="button button-primary" id="modal-save-inv-btn">💾 Save Investigation Notes</button>
+                  <span id="modal-triage-status" class="triage-status-text"></span>
+                </div>
+              </div>
+
+              <!-- FEATURES MATRIX -->
+              <div class="investigation-section">
+                <div class="section-title-row">
+                  <h4>Traffic Features Matrix (12 NSL-KDD Attributes)</h4>
+                  <span class="panel-chip">12 FEATURES</span>
+                </div>
+                <div class="features-grid" id="modal-features-grid">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- RAW JSON -->
+              <div class="investigation-section">
+                <div class="section-title-row">
+                  <h4>Raw Event JSON Payload</h4>
+                  <button class="button button-sm button-secondary" id="modal-copy-json-btn">Copy JSON</button>
+                </div>
+                <pre class="json-code-block" id="modal-raw-json">{}</pre>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <span class="modal-footer-note">THREATNEX Machine Learning Inference Record</span>
+              <button class="button button-secondary" id="modal-dismiss-btn">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOURCE IP PROFILE MODAL -->
+        <div class="modal-backdrop" id="source-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+          <div class="modal-card source-modal-card">
+            <div class="modal-header">
+              <div class="modal-header-info">
+                <span class="modal-eyebrow">SOURCE IP INTELLIGENCE PROFILE</span>
+                <h3 id="source-modal-ip">—</h3>
+              </div>
+              <button class="modal-close-btn" id="source-modal-close-btn" aria-label="Close source modal">✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="source-stats-grid">
+                <div class="source-stat-box">
+                  <span>TOTAL EVENTS</span>
+                  <strong id="src-stat-total">—</strong>
+                </div>
+                <div class="source-stat-box">
+                  <span>THREAT COUNT</span>
+                  <strong id="src-stat-threats" class="text-red">—</strong>
+                </div>
+                <div class="source-stat-box">
+                  <span>THREAT RATIO</span>
+                  <strong id="src-stat-ratio">—%</strong>
+                </div>
+                <div class="source-stat-box">
+                  <span>FIRST OBSERVED</span>
+                  <strong id="src-stat-first">—</strong>
+                </div>
+                <div class="source-stat-box">
+                  <span>LAST OBSERVED</span>
+                  <strong id="src-stat-last">—</strong>
+                </div>
+              </div>
+
+              <div class="investigation-section">
+                <h4>Observed Attack Classification Breakdown</h4>
+                <div class="source-labels-chips" id="src-labels-chips"></div>
+              </div>
+
+              <div class="investigation-section">
+                <h4>Recent Events From This Source IP</h4>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>TIME</th>
+                        <th>CLASSIFICATION</th>
+                        <th>SEVERITY</th>
+                        <th>CONFIDENCE</th>
+                        <th>STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody id="src-recent-events-tbody">
+                      <tr><td colspan="6" class="table-empty">Loading source events...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="button button-primary" id="src-modal-hunt-btn">⌕ Hunt All Events For This IP</button>
+              <button class="button button-secondary" id="source-modal-dismiss-btn">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVE SEARCH MODAL -->
+        <div class="modal-backdrop" id="save-query-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+          <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+              <h3>Save Current Search</h3>
+              <button class="modal-close-btn" id="save-query-modal-close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+              <label class="field">
+                <span>Preset Name</span>
+                <input type="text" id="save-query-name-input" placeholder="e.g. Critical Unresolved DoS, Internal Probes...">
+              </label>
+              <p class="field-hint" style="margin-top: 8px; color: var(--muted); font-size: 12px;">This preset will save your active filters (classification, severity, status, IP, date range) to your user profile.</p>
+            </div>
+            <div class="modal-footer">
+              <button class="button button-primary" id="save-query-confirm-btn">Save Query</button>
+              <button class="button button-secondary" id="save-query-cancel-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast" role="status"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+
+</html>

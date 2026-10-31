@@ -1,0 +1,95 @@
+# ==============================================================================
+# THREATNEX AI-IDS — GIT IGNORE CONFIGURATION (.gitignore)
+# ==============================================================================
+# Protects credentials, databases, virtual environments, raw datasets,
+# test harnesses, and audit caches from version control.
+# ==============================================================================
+
+# --- Secrets, Environment Variables & Encryption Keys ---
+.env
+.env.local
+.env.*.local
+.secret_key
+*.pem
+*.key
+*.cert
+
+# --- SQLite Databases & Transaction Logs ---
+ids.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# --- Backup Archives ---
+ai-ids-backup*
+backup*
+backups/
+*_backup.*
+*.bak
+*.before-*
+*.before*
+
+# --- Python Virtual Environments & Packages ---
+.venv/
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# --- Raw Benchmark Datasets (Pre-trained models & metrics are tracked) ---
+data/
+datasets/
+*.txt
+!requirements.txt
+
+# --- Research, Audit & Experiment Directories ---
+ml_performance_audit/
+threshold_validation/
+
+# --- Test Scripts & QA Harnesses ---
+test_*.py
+run_*.py
+pytest.ini
+
+# --- IDE & OS Metadata ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Temporary & Scratch Files ---
+scratch/
+tmp/
+*.log
+

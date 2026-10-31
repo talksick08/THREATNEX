@@ -1,0 +1,57 @@
+{
+    "source": "NSL-KDD",
+    "accuracy": 78.55,
+    "samples": 148517,
+    "train_samples": 125973,
+    "test_samples": 22544,
+    "labels": [
+        "normal",
+        "dos",
+        "probe",
+        "brute_force"
+    ],
+    "precision": {
+        "normal": 68.99,
+        "dos": 97.1,
+        "probe": 81.94,
+        "brute_force": 96.23
+    },
+    "recall": {
+        "normal": 97.05,
+        "dos": 83.07,
+        "probe": 75.71,
+        "brute_force": 8.63
+    },
+    "f1": {
+        "normal": 80.65,
+        "dos": 89.54,
+        "probe": 78.7,
+        "brute_force": 15.84
+    },
+    "importance": [
+        [
+            "src_bytes",
+            0.312002
+        ],
+        [
+            "dst_bytes",
+            0.110734
+        ],
+        [
+            "srv_count",
+            0.107504
+        ],
+        [
+            "count",
+            0.099106
+        ],
+        [
+            "serror_rate",
+            0.095476
+        ],
+        [
+            "diff_srv_rate",
+            0.069491
+        ]
+    ]
+}

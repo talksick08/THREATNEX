@@ -1,0 +1,56 @@
+# ==============================================================================
+# THREATNEX AI-IDS — VERCEL DEPLOYMENT IGNORE LIST (.vercelignore)
+# ==============================================================================
+# Excludes development artifacts, test harnesses, and raw datasets to keep
+# the serverless bundle lean, secure, and well under deployment limits.
+# ==============================================================================
+
+# Virtual Environments & Python Cache
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Raw NSL-KDD Training Datasets
+# Note: Trained models (model.joblib, model_candidate.joblib) and metrics.json
+# are preserved and bundled. Raw uncompressed text files (~22.5 MB) are excluded.
+data/
+datasets/
+*.txt
+
+# Audit and Experiment Directories
+ml_performance_audit/
+threshold_validation/
+backups/
+ai-ids-backup*/
+
+# Test Scripts and QA Harnesses
+test_*.py
+run_*.py
+conftest.py
+pytest.ini
+
+# Local Environment Secrets & Configuration
+.secret_key
+.env
+.env.local
+.env.*.local
+
+# Version Control and Metadata
+.git/
+.gitignore
+.github/
+
+# Documentation and Temporary Files
+*.md
+!README.md
+scratch/
+tmp/
+*.log
+

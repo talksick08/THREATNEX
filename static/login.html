@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THREATNEX Login — Authentication Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070c16;
+      --surface: #0f1929;
+      --surface-2: #142236;
+      --border: #23364d;
+      --border-soft: #18283a;
+      --text: #edf4ff;
+      --muted: #8fa5c1;
+      --cyan: #38d8e8;
+      --blue: #58a6ff;
+      --red: #ff667d;
+      --green: #39d9a2;
+      --font: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --heading: "Space Grotesk", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 20%, #10213b 0%, var(--bg) 75%);
+      color: var(--text);
+      font-family: var(--font);
+      padding: 20px;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(56, 216, 232, 0.12);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--heading);
+      font-size: 28px;
+      font-weight: 700;
+      color: #071321;
+      box-shadow: 0 0 24px rgba(56, 216, 232, 0.35);
+      margin-bottom: 12px;
+    }
+
+    .brand-title {
+      font-family: var(--heading);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .brand-title span { color: var(--cyan); }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 22px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 9px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s ease;
+      text-align: center;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--cyan);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Forms */
+    .auth-form {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .auth-form.active {
+      display: flex;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 42px;
+      padding: 10px 14px;
+      background: #080f1a;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13.5px;
+      transition: all .2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(56, 216, 232, 0.2);
+      background: #0b1424;
+    }
+
+    .form-input::placeholder {
+      color: #536785;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+      margin-top: 6px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      border: none;
+      border-radius: 9px;
+      color: #05101d;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(56, 216, 232, 0.25);
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(56, 216, 232, 0.38);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Feedback Banner */
+    .status-msg {
+      display: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .status-msg.error {
+      display: block;
+      background: rgba(255, 102, 125, 0.12);
+      border: 1px solid rgba(255, 102, 125, 0.4);
+      color: var(--red);
+    }
+
+    .status-msg.success {
+      display: block;
+      background: rgba(57, 217, 162, 0.12);
+      border: 1px solid rgba(57, 217, 162, 0.4);
+      color: var(--green);
+    }
+
+    .auth-footer {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-soft);
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .auth-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="brand-header">
+      <div class="brand-logo">T</div>
+      <h1 class="brand-title">THREAT<span>NEX</span></h1>
+      <div class="brand-subtitle">AI-Driven Intrusion Defense</div>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="auth-tabs" role="tablist">
+      <button type="button" class="tab-btn active" id="tab-login" role="tab" aria-selected="true" onclick="switchTab('login')">Sign In</button>
+      <button type="button" class="tab-btn" id="tab-register" role="tab" aria-selected="false" onclick="switchTab('register')">Register Analyst</button>
+    </div>
+
+    <!-- Status Message -->
+    <div id="statusMsg" class="status-msg" role="alert"></div>
+
+    <!-- 1. SIGN IN FORM -->
+    <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label" for="login-username">Username</label>
+        <input type="text" id="login-username" class="form-input" placeholder="Enter username" autocomplete="username" required autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="submit-btn" id="loginSubmitBtn">Access Security Console →</button>
+    </form>
+
+    <!-- 2. REGISTRATION FORM -->
+    <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label class="form-label" for="reg-username">Username <span style="font-size: 10px; color: var(--muted);">(3-30 characters)</span></label>
+        <input type="text" id="reg-username" class="form-input" placeholder="e.g. analyst_john" autocomplete="username" required pattern="^[a-zA-Z0-9_\-\.]{3,30}$" title="3-30 alphanumeric characters, dots, underscores or hyphens" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-display-name">Display Name <span style="font-size: 10px; color: var(--muted);">(Optional)</span></label>
+        <input type="text" id="reg-display-name" class="form-input" placeholder="e.g. John Doe (SOC Analyst)" autocomplete="name" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-password">Password <span style="font-size: 10px; color: var(--muted);">(min. 6 characters)</span></label>
+        <input type="password" id="reg-password" class="form-input" placeholder="••••••••" autocomplete="new-password" required minlength="6" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-confirm-password">Confirm Password</label>
+        <input type="password" id="reg-confirm-password" class="form-input" placeholder="••••••••" autocomplete="new-password" required minlength="6" />
+      </div>
+      <button type="submit" class="submit-btn" id="regSubmitBtn">Create Analyst Account →</button>
+    </form>
+
+    <div class="auth-footer">
+      <span>Enterprise Intrusion Detection · Machine Learning Engine</span>
+    </div>
+  </div>
+
+  <script>
+    let activeTab = 'login';
+
+    function setStatus(msg, type) {
+      const el = document.getElementById('statusMsg');
+      if (!msg) {
+        el.className = 'status-msg';
+        el.textContent = '';
+        el.style.display = 'none';
+        return;
+      }
+      el.className = `status-msg ${type}`;
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      setStatus('', '');
+
+      const tabLogin = document.getElementById('tab-login');
+      const tabReg = document.getElementById('tab-register');
+      const formLogin = document.getElementById('loginForm');
+      const formReg = document.getElementById('registerForm');
+
+      if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabLogin.setAttribute('aria-selected', 'true');
+        tabReg.classList.remove('active');
+        tabReg.setAttribute('aria-selected', 'false');
+        formLogin.classList.add('active');
+        formReg.classList.remove('active');
+        document.getElementById('login-username').focus();
+      } else {
+        tabReg.classList.add('active');
+        tabReg.setAttribute('aria-selected', 'true');
+        tabLogin.classList.remove('active');
+        tabLogin.setAttribute('aria-selected', 'false');
+        formReg.classList.add('active');
+        formLogin.classList.remove('active');
+        document.getElementById('reg-username').focus();
+      }
+    }
+
+    async function getCsrfToken() {
+      try {
+        const resp = await fetch('/api/csrf-token', { credentials: 'same-origin', cache: 'no-store' });
+        if (resp.ok) {
+          const data = await resp.json();
+          return data.csrf_token;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      setStatus('', '');
+
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('loginSubmitBtn');
+
+      if (!username || !password) {
+        setStatus('Username and password are required.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Authenticating...';
+
+      try {
+        const token = await getCsrfToken();
+        const resp = await fetch('/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token || ''
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const result = await resp.json().catch(() => ({}));
+        if (resp.ok && result.success) {
+          setStatus('Authentication successful. Redirecting to SOC Console...', 'success');
+          setTimeout(() => { window.location.href = '/'; }, 400);
+        } else {
+          setStatus(result.error || 'Invalid username or password.', 'error');
+        }
+      } catch (err) {
+        setStatus('Network connection error. Check server status.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Access Security Console →';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      setStatus('', '');
+
+      const username = document.getElementById('reg-username').value.trim();
+      const displayName = document.getElementById('reg-display-name').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirmPassword = document.getElementById('reg-confirm-password').value;
+      const btn = document.getElementById('regSubmitBtn');
+
+      if (!username || !password) {
+        setStatus('Username and password are required.', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        setStatus('Password must be at least 6 characters long.', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setStatus('Passwords do not match. Please verify your password.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating Account...';
+
+      try {
+        const token = await getCsrfToken();
+        const resp = await fetch('/register', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token || ''
+          },
+          body: JSON.stringify({
+            username: username,
+            display_name: displayName,
+            password: password,
+            confirm_password: confirmPassword
+          })
+        });
+
+        const result = await resp.json().catch(() => ({}));
+        if (resp.status === 201 || (resp.ok && result.success)) {
+          setStatus('Account registered successfully! Logging into Security Console...', 'success');
+          setTimeout(() => { window.location.href = '/'; }, 600);
+        } else {
+          setStatus(result.error || 'Registration failed. Check inputs.', 'error');
+        }
+      } catch (err) {
+        setStatus('Network connection error. Check server status.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Analyst Account →';
+      }
+    }
+
+    // Auto-switch to register tab if URL contains #register
+    if (window.location.hash === '#register') {
+      switchTab('register');
+    }
+  </script>
+</body>
+</html>
