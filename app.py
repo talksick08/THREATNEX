@@ -20,7 +20,20 @@ from train import FEATURES, LABELS, METRICS_PATH, MODEL_PATH, train
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 import tempfile
-DB_PATH = (Path(tempfile.gettempdir()) / "ids.db") if os.getenv("VERCEL") else (BASE_DIR / "ids.db")
+# Database path resolution: supports persistent disk path via environment variable
+_env_db_path = os.getenv("SQLITE_PATH") or os.getenv("DATABASE_PATH") or os.getenv("THREATNEX_DB_PATH")
+if _env_db_path:
+    DB_PATH = Path(_env_db_path)
+elif os.getenv("VERCEL"):
+    DB_PATH = Path(tempfile.gettempdir()) / "ids.db"
+else:
+    DB_PATH = BASE_DIR / "ids.db"
+
+# Ensure parent directory exists safely for custom/persistent mount paths
+try:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 METRICS_FILE = BASE_DIR / "metrics.json"
 CANDIDATE_MODEL_PATH = BASE_DIR / "model_candidate.joblib"
 
@@ -2508,6 +2521,38 @@ def current_user_info():
     return jsonify({'error': 'User not found'}), 404
 
 
+@app.route('/healthz', methods=['GET'])
+def healthz():
+    """
+    Unauthenticated liveness and readiness probe for cloud hosting platforms (e.g. Render).
+    Returns HTTP 200 only when application and SQLite database are operational.
+    Does not expose sensitive credentials, hashes, or configuration.
+    """
+    db_ok = False
+    try:
+        with get_connection() as conn:
+            conn.execute("SELECT 1").fetchone()
+            db_ok = True
+    except Exception as e:
+        app.logger.warning(f"Healthz database probe failed: {e}")
+
+    model_ok = (model is not None and hasattr(model, "predict_proba"))
+
+    if db_ok:
+        return jsonify({
+            "status": "healthy",
+            "service": "threatnex-ai-ids",
+            "database": "connected",
+            "model": "ready" if model_ok else "degraded"
+        }), 200
+    else:
+        return jsonify({
+            "status": "unhealthy",
+            "service": "threatnex-ai-ids",
+            "database": "disconnected"
+        }), 503
+
+
 @app.route('/health', methods=['GET'])
 @app.route('/api/health', methods=['GET'])
 @login_required
@@ -2551,4 +2596,6 @@ def health_check():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=False)
+    port = int(os.getenv('PORT', 5000))
+    host = os.getenv('HOST', '0.0.0.0') if os.getenv('PORT') else '127.0.0.1'
+    app.run(host=host, port=port, debug=False)
