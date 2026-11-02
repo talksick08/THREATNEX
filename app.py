@@ -251,9 +251,192 @@ def ensure_database_indexes():
                 pass
 
 
+def restore_seed_database_if_needed():
+    """
+    Restore SQLite database from compressed Base64 environment variable chunks on cold start.
+    Executes only if the active database has zero events (uninitialized or temporary users-only DB).
+    Never overwrites a database containing existing event history.
+    Merges any existing temporary users safely without overwriting passwords or roles.
+    Reconstructs via an atomic temporary file with full SHA256 and SQLite integrity verification.
+    """
+    target_path = Path(DB_PATH)
+    existing_users = []
+
+    # 1. Inspect existing database if present
+    if target_path.exists():
+        check_conn = None
+        cur = None
+        try:
+            check_conn = sqlite3.connect(str(target_path), timeout=5.0)
+            check_conn.row_factory = sqlite3.Row
+            cur = check_conn.cursor()
+
+            # Check for existing events: if events exist, never overwrite!
+            has_events = False
+            try:
+                ev_cnt = cur.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+                if ev_cnt > 0:
+                    has_events = True
+            except Exception:
+                pass
+
+            if has_events:
+                # Database already has event history. Preserve it completely.
+                return False
+
+            # Database has 0 events: extract existing temporary users to preserve them
+            try:
+                rows = cur.execute("SELECT * FROM users ORDER BY id ASC").fetchall()
+                existing_users = [dict(r) for r in rows]
+            except Exception:
+                existing_users = []
+
+        except Exception:
+            pass
+        finally:
+            cur = None
+            if check_conn:
+                check_conn.close()
+            check_conn = None
+            import gc
+            gc.collect()
+
+    # 2. Collect and validate all 9 environment-variable chunks
+    REQUIRED_CHUNKS = 9
+    chunks = []
+    for i in range(1, REQUIRED_CHUNKS + 1):
+        chunk = os.getenv(f"THREATNEX_SEED_CHUNK_{i}")
+        if not chunk or not chunk.strip():
+            # Incomplete or missing chunk: abort restoration
+            return False
+        chunks.append(chunk.strip())
+
+    try:
+        import base64
+        import lzma
+        import gzip
+        import hashlib
+
+        # 3. Decode Base64 and decompress
+        raw_b64 = "".join(chunks)
+        compressed_bytes = base64.b64decode(raw_b64.encode("ascii"))
+
+        if compressed_bytes.startswith(b"\xfd7zXZ\x00"):
+            db_bytes = lzma.decompress(compressed_bytes)
+        elif compressed_bytes.startswith(b"\x1f\x8b"):
+            db_bytes = gzip.decompress(compressed_bytes)
+        else:
+            try:
+                db_bytes = lzma.decompress(compressed_bytes)
+            except Exception:
+                db_bytes = gzip.decompress(compressed_bytes)
+
+        # 4. Check SHA256 checksum before activation
+        EXPECTED_SEED_SHA256 = "6603ad356b882e5c9c27dc49a17741439b9db4be6bf49b12c9a974995dd4b118"
+        actual_sha256 = hashlib.sha256(db_bytes).hexdigest().lower()
+        if actual_sha256 != EXPECTED_SEED_SHA256:
+            raise ValueError(f"Seed SHA256 checksum mismatch: {actual_sha256} != {EXPECTED_SEED_SHA256}")
+
+        # 5. Write to temporary atomic file in the same directory as DB_PATH
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        temp_file = target_path.with_suffix(".tmp_seed")
+
+        with open(temp_file, "wb") as f:
+            f.write(db_bytes)
+
+        # 6. Validate SQLite integrity, tables, and expected seed event count
+        temp_conn = None
+        try:
+            temp_conn = sqlite3.connect(str(temp_file))
+            temp_conn.row_factory = sqlite3.Row
+
+            status = temp_conn.execute("PRAGMA integrity_check").fetchone()
+            if not status or status[0] != "ok":
+                raise ValueError(f"SQLite PRAGMA integrity_check failed: {status}")
+
+            tables = [r[0] for r in temp_conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+            if "events" not in tables or "users" not in tables:
+                raise ValueError("Expected tables 'events' and 'users' not found in seed database.")
+
+            seed_users_count = temp_conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+            seed_events_count = temp_conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+
+            if seed_events_count != 222:
+                raise ValueError(f"Expected exactly 222 seed events, found {seed_events_count}")
+
+            # 7. Merge existing temporary users if any existed in the pre-restore database
+            if existing_users:
+                seed_user_rows = temp_conn.execute("SELECT username, password_hash FROM users").fetchall()
+                seed_usernames = {r["username"].lower(): r["password_hash"] for r in seed_user_rows}
+
+                for eu in existing_users:
+                    u_name = eu.get("username", "").strip()
+                    if not u_name:
+                        continue
+                    p_hash = eu.get("password_hash", "")
+                    is_adm = eu.get("is_admin", 0)
+                    theme = eu.get("theme") or "dark"
+                    sev = eu.get("notify_severity") or "critical"
+                    psize = eu.get("page_size") or 20
+                    disp = eu.get("display_name") or u_name
+                    sjson = eu.get("settings_json") or "{}"
+
+                    target_username = u_name
+                    if u_name.lower() in seed_usernames:
+                        if seed_usernames[u_name.lower()] == p_hash:
+                            # Identical account and hash: already present
+                            continue
+                        else:
+                            # Username conflict with different password:
+                            # Preserve existing temporary account under an unambiguous username
+                            target_username = f"{u_name}_temp"
+                            suffix = 1
+                            while target_username.lower() in seed_usernames:
+                                target_username = f"{u_name}_temp{suffix}"
+                                suffix += 1
+                            app.logger.info(f"Preserving existing temporary user as '{target_username}' to avoid overwriting.")
+
+                    temp_conn.execute(
+                        """
+                        INSERT INTO users (username, password_hash, is_admin, theme, notify_severity, page_size, display_name, settings_json)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (target_username, p_hash, is_adm, theme, sev, psize, disp, sjson)
+                    )
+                    seed_usernames[target_username.lower()] = p_hash
+
+                temp_conn.commit()
+
+            final_users_count = temp_conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+            final_events_count = temp_conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+
+        finally:
+            if temp_conn:
+                temp_conn.close()
+            temp_conn = None
+            import gc
+            gc.collect()
+
+        # 8. Atomic file replacement
+        os.replace(str(temp_file), str(target_path))
+        app.logger.info(f"Cold-start SQLite database successfully seeded ({final_users_count} users, {final_events_count} events).")
+        return True
+
+    except Exception as e:
+        app.logger.warning(f"Cold-start seed restoration skipped or failed: {e}")
+        try:
+            temp_file = target_path.with_suffix(".tmp_seed")
+            if temp_file.exists():
+                temp_file.unlink()
+        except Exception:
+            pass
+        return False
+
+
 model = load_model()
 candidate_model = load_candidate_model()
 try:
+    restore_seed_database_if_needed()
     init_db()
     # Ensure user and event profile columns exist (idempotent migration)
     ensure_user_columns()
